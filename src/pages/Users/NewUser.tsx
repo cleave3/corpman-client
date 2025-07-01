@@ -43,7 +43,7 @@ const NewUser = ({ user, isOpen, openModal, closeModal }: NewUserProps) => {
 
     useEffect(() => {
         getUserPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -317,7 +317,12 @@ const NewUser = ({ user, isOpen, openModal, closeModal }: NewUserProps) => {
                             )}
                             <div className="mt-4">
                                 <div className="w-full flex items-center">
-                                    <Checkbox onChange={handleSelectAll} checked={allSelected} className="mx-1" />
+                                    <Checkbox
+                                        onChange={handleSelectAll}
+                                        checked={allSelected}
+                                        className="mx-1"
+                                        disabled={user?.uid === auth?.uid}
+                                    />
                                     <Label className="block font-medium mt-2">
                                         {/* {user ? `${userData.first_name} ${userData.last_name}` : "Select"} Permissions */}
                                         Permissions
@@ -331,6 +336,7 @@ const NewUser = ({ user, isOpen, openModal, closeModal }: NewUserProps) => {
                                                 {items.map((perm) => (
                                                     <Checkbox
                                                         key={perm.action}
+                                                        disabled={user?.uid === auth?.uid}
                                                         onChange={() => handlePermissions(perm.action)}
                                                         checked={userData.permissions.includes(perm.action)}
                                                         label={perm.name}
