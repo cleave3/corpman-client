@@ -130,7 +130,7 @@ const NewUser = ({ user, isOpen, openModal, closeModal }: NewUserProps) => {
         if (openConfirm.action === "create") {
             cm(userData, {
                 onSuccess() {
-                    toast.success("Member created successfully. They will recieve an sms with their login details");
+                    toast.success("Member created successfully. They will recieve an email/sms with their login details");
                     resetForm();
                 },
                 onError: (error) => {
