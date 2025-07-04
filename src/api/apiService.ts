@@ -43,13 +43,17 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry && Cookies.get("refresh_token")) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                const { data } = await axios.get(`${BASE_URL}/api/v1/auth/refresh-token`);
-                Cookies.set("access_token", data.access_token, { expires: 1 });
-                Cookies.set("refresh_token", data.refresh_token, { expires: 1 });
-                originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+                const { data } = await axios.get(`${BASE_URL}/api/v1/auth/refresh-token`, {
+                    headers: {
+                        Authorization: `Bearer ${Cookies.get("refresh_token")}`
+                    }
+                });
+                Cookies.set("access_token", data.data.access_token, { expires: 1 });
+                Cookies.set("refresh_token", data.data.refresh_token, { expires: 1 });
+                originalRequest.headers.Authorization = `Bearer ${data.data.access_token}`;
                 return api(originalRequest);
             } catch (err) {
                 console.error(err);

@@ -257,14 +257,14 @@ const AppSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`fixed mt-20 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+            <div className={`lg:py-8 py-4 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
                 <Link to="/">
                     {isExpanded || isHovered || isMobileOpen ? (
                         <>
@@ -275,7 +275,7 @@ const AppSidebar: React.FC = () => {
                                     width={60}
                                     height={60}
                                 /> */}
-                                {user?.image_url ? (
+                                {/* {user?.image_url ? (
                                     <>
                                         <img
                                             className="dark:hidden mb-2 rounded-full"
@@ -297,8 +297,8 @@ const AppSidebar: React.FC = () => {
                                         {user?.first_name?.[0]}
                                         {user?.last_name?.[0]}
                                     </div>
-                                )}
-                                <span className="text-lg font-semibold text-gray-700 dark:text-gray-200 mt-2">
+                                )} */}
+                                <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                                     Welcome, <span className="text-brand-600">{user?.first_name}</span>
                                 </span>
                             </div>

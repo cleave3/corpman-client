@@ -76,7 +76,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
         <div
-          className={`flex items-center gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0`}
+          className={`flex items-center gap-4 px-5 lg:flex lg:justify-end lg:px-0`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Dark Mode Toggler --> */}
