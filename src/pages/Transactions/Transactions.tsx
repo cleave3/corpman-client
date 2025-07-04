@@ -27,7 +27,7 @@ const Transactions = () => {
 
     const { closeModal, isOpen, openModal } = useModal();
 
-    const { notDesktop } = useWidth()
+    const { notDesktop } = useWidth();
 
     const { data, isLoading } = useTransactions(filterData);
 
@@ -261,6 +261,12 @@ const Transactions = () => {
                                         <div className="text-sm text-gray-700 dark:text-gray-200">
                                             {formatDate(transaction?.created_at, "lll")}
                                         </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-y-2 mb-2">
+                                    <div className="w-full">
+                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
+                                        <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
                                     </div>
                                 </div>
                             </div>

@@ -250,6 +250,11 @@ export default class ApiService {
         return res.data;
     }
 
+    static async listMyEntries(month: number, year: number): Promise<APIResponse<Transaction[]>> {
+        const res = await api.get(`/api/v1/transaction/my-entries?year=${year}&month=${month}`);
+        return res.data;
+    }
+
     static async getTransaction(transactionId: string): Promise<APIResponse<unknown>> {
         const res = await api.get(`/api/v1/transaction/${transactionId}`);
         return res.data;

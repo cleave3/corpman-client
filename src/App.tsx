@@ -17,6 +17,7 @@ import Users from "./pages/Users/Users";
 import PendingTransactions from "./pages/Transactions/PendingTransactions";
 import NewTransaction from "./pages/Transactions/NewTransaction";
 import Metrics from "./pages/Metrics";
+import MyEntries from "./pages/MyEntries";
 
 const protected_routes = [
     {
@@ -59,6 +60,12 @@ const protected_routes = [
     {
         Path: ROUTES.PROFILE,
         element: <PrivateRoute children={<UserProfiles />} />,
+        isIndex: false
+    },
+
+    {
+        Path: ROUTES.MY_ENTRIES,
+        element: <PrivateRoute children={<MyEntries />} />,
         isIndex: false
     },
     {

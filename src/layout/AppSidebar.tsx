@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChartPieIcon } from "@heroicons/react/24/outline";
+import { ChartPieIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router";
 import { ChevronDownIcon, GridIcon, ListIcon, PageIcon, TeamIcon, UserGroup, UserIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -70,6 +70,12 @@ const navItems: NavItem[] = [
         icon: <ListIcon />,
         path: ROUTES.SETTINGS,
         componentPermissions: menuPermissions("business")
+    },
+    {
+        icon: <BookOpenIcon />,
+        name: "My Entries",
+        path: ROUTES.MY_ENTRIES,
+        componentPermissions: []
     },
     {
         icon: <UserIcon />,

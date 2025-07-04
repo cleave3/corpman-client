@@ -57,7 +57,8 @@ export const ROUTES = {
     PENDING_TRANSACTIONS: "/transactions/pending",
     PROFILE: "/profile",
     SETTINGS: "/settings",
-    USERS: "/users"
+    USERS: "/users",
+    MY_ENTRIES: "/my-entries",
 };
 
 export const formatCurrency = (value: number, currency = "₦") => {

@@ -137,6 +137,13 @@ export const useTransactions = (params: PaginatedQuery) => {
     });
 };
 
+export const useMyEntries = (month: number, year: number) => {
+    return useQuery({
+        queryKey: ["entries", month, year],
+        queryFn: () => ApiService.listMyEntries(month, year)
+    });
+};
+
 export const usePendingTransactions = () => {
     return useQuery({
         queryKey: ["pendingTransactions"],
