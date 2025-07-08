@@ -99,9 +99,9 @@ const App = () => {
                 </Routes>
             </Router>
             <ToastContainer
-                position="top-center"
+                position="bottom-center"
                 style={{ zIndex: 999999999 }}
-                autoClose={3000}
+                autoClose={5000}
                 hideProgressBar
                 newestOnTop
                 closeOnClick={true}
@@ -111,7 +111,6 @@ const App = () => {
                 pauseOnHover
                 theme={theme.theme}
                 transition={Bounce}
-                stacked
             />
         </>
     );
