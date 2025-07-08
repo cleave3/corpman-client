@@ -29,7 +29,7 @@ const Metrics = () => {
                 className="text-2xl font-semibold text-center my-4
                     text-gray-900 dark:text-white"
             >
-                Performance for metrics for {months[month - 1]} {year}
+                Performance metrics for {months[month - 1]} {year}
             </h2>
             <div className="flex items-center justify-start gap-2">
                 <select
