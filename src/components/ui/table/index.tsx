@@ -73,17 +73,41 @@ const TableCell: React.FC<TableCellProps> = ({ children, isHeader = false, class
     );
 };
 
-const TableLoader: React.FC<{ length?: number }> = ({ length = 8 }) => {
+const TableLoader: React.FC<{ length?: number }> = ({ length = 6 }) => {
     return (
-        <div className="p-8">
-            <div className="animate-pulse">
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                    <div className="max-w-full overflow-x-auto">
+        <div className="p-4 sm:p-8">
+            <div className="animate-pulse space-y-4 sm:space-y-0">
+                {/* Mobile View */}
+                <div className="block sm:hidden space-y-4">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                        <div
+                            key={idx}
+                            className="rounded-lg border border-gray-100 dark:border-white/[0.05] p-4 bg-white dark:bg-white/[0.03] shadow-sm"
+                        >
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-gray-200" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                                    <div className="h-3 bg-gray-200 rounded w-1/3" />
+                                </div>
+                            </div>
+                            <div className="space-y-2 text-sm">
+                                <div className="h-3 bg-gray-200 rounded w-5/6" />
+                                <div className="h-3 bg-gray-200 rounded w-4/6" />
+                                <div className="h-3 bg-gray-200 rounded w-3/6" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop View */}
+                <div className="hidden sm:block overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                    <div className="overflow-x-auto">
                         <div className="min-w-[1102px]">
                             <table className="w-full">
                                 <thead>
                                     <tr>
-                                        {Array.from({ length: 6 }).map((_, idx) => (
+                                        {Array.from({ length }).map((_, idx) => (
                                             <th key={idx} className="px-5 py-3">
                                                 <div className="h-4 bg-gray-200 rounded w-24" />
                                             </th>
@@ -91,9 +115,9 @@ const TableLoader: React.FC<{ length?: number }> = ({ length = 8 }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Array.from({ length }).map((_, rowIdx) => (
+                                    {Array.from({ length: 5 }).map((_, rowIdx) => (
                                         <tr key={rowIdx} className="border-b border-gray-100 dark:border-white/[0.05]">
-                                            {Array.from({ length: 6 }).map((_, colIdx) => (
+                                            {Array.from({ length }).map((_, colIdx) => (
                                                 <td key={colIdx} className="px-5 py-4">
                                                     <div className="h-4 bg-gray-200 rounded w-full" />
                                                 </td>
