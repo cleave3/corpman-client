@@ -15,7 +15,7 @@ const OverviewStats = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
             <AccessWrapper componentPermissions={[PERMISSION_VALUES.dashboard.dashboard_balances]}>
                 <StatsCard
-                    icon={<Money className="size-6 text-white/90 dark:text-black" />}
+                    icon={<Money className="size-6 text-blue-500" />}
                     isLoading={isLoading}
                     title={"Customers Balances"}
                     value={formatCurrencyShort(stats?.total_balances)}
@@ -24,7 +24,7 @@ const OverviewStats = () => {
             <AccessWrapper componentPermissions={[PERMISSION_VALUES.dashboard.dashboard_pending]}>
                 <StatsCard
                     onClick={() => navigate(`${ROUTES.PENDING_TRANSACTIONS}`)}
-                    icon={<PageIcon className="size-6 text-white/90 dark:text-black" />}
+                    icon={<PageIcon className="size-6 text-blue-500" />}
                     isLoading={isLoading}
                     title={"Pending Transactions"}
                     value={formatNumber(stats?.total_pending_transactions)}
@@ -33,7 +33,7 @@ const OverviewStats = () => {
             <AccessWrapper componentPermissions={[PERMISSION_VALUES.dashboard.dashboard_customers]}>
                 <StatsCard
                     onClick={() => navigate(ROUTES.CUSTOMERS)}
-                    icon={<UserGroup className="size-6 text-white/90 dark:text-black" />}
+                    icon={<UserGroup className="size-6 text-blue-500" />}
                     isLoading={isLoading}
                     title={"Customers"}
                     value={formatNumber(stats?.total_customers)}

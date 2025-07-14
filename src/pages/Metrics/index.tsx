@@ -12,7 +12,7 @@ const Metrics = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
 
-    const { isMobile } = useWidth()
+    const { isMobile } = useWidth();
 
     const { data, isLoading } = useTransactionsByInitiator(year, month);
 
@@ -20,8 +20,6 @@ const Metrics = () => {
     const total_customer_deposits = data?.data?.total_customer_deposits;
     const total_income = data?.data?.total_income;
     const total_payouts = data?.data?.total_payouts;
-
-    if (isLoading) return <MetricsLoader />;
 
     return (
         <>
@@ -61,67 +59,27 @@ const Metrics = () => {
                     ))}
                 </select>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-                <div className="flex flex-col my-6">
-                    {total_customer_deposits || total_income || total_payouts ? (
-                        <Chart
-                            type="pie"
-                            height={400}
-                            series={[total_customer_deposits || 0, total_income || 0, total_payouts || 0]}
-                            options={{
-                                labels: ["Total Customer Deposits", "Total Income", "Total Payouts"],
-                                legend: {
-                                    position: isMobile ? "top" : "left",
-
-                                    formatter: (seriesName: string, opts) => {
-                                        const value = opts.w.globals.series[opts.seriesIndex];
-                                        return `${seriesName}: ${formatCurrency(value)}`;
-                                    }
-                                },
-                                title: { text: "Financial Flow Breakdown", align: "center" },
-                                tooltip: {
-                                    y: {
-                                        formatter: (val: number) => formatCurrency(val)
-                                    }
-                                }
-                            }}
-                        />
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-96 text-gray-400">
-                            <span className="text-lg">No financial data available for this period.</span>
-                        </div>
-                    )}
-                    <div className="mt-6">
-                        {initiators && initiators.length > 0 ? (
+            {isLoading ? (
+                <MetricsLoader />
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                    <div className="flex flex-col my-6">
+                        {total_customer_deposits || total_income || total_payouts ? (
                             <Chart
-                                type="bar"
+                                type="pie"
                                 height={400}
-                                series={[
-                                    {
-                                        name: "Collection Volume",
-                                        data: initiators?.map((i) => i.collection_volume) || []
-                                    }
-                                ]}
+                                series={[total_customer_deposits || 0, total_income || 0, total_payouts || 0]}
                                 options={{
-                                    chart: { id: "initiator-collection-volume" },
-                                    xaxis: {
-                                        categories: initiators?.map((i) => i.name) || [],
-                                        title: { text: "Collectors name" }
-                                    },
-                                    yaxis: {
-                                        title: { text: "Amount Collected" },
-                                        labels: {
-                                            formatter: (val: number) => formatCurrency(val)
+                                    labels: ["Total Customer Deposits", "Total Income", "Total Payouts"],
+                                    legend: {
+                                        position: isMobile ? "top" : "left",
+
+                                        formatter: (seriesName: string, opts) => {
+                                            const value = opts.w.globals.series[opts.seriesIndex];
+                                            return `${seriesName}: ${formatCurrency(value)}`;
                                         }
                                     },
-                                    title: {
-                                        text: "Collections Stats",
-                                        align: "center"
-                                    },
-                                    legend: {
-                                        show: true,
-                                        formatter: (seriesName: string) => `Collection Volume (${seriesName})`
-                                    },
+                                    title: { text: "Financial Flow Breakdown", align: "center" },
                                     tooltip: {
                                         y: {
                                             formatter: (val: number) => formatCurrency(val)
@@ -131,15 +89,59 @@ const Metrics = () => {
                             />
                         ) : (
                             <div className="flex flex-col items-center justify-center h-96 text-gray-400">
-                                <span className="text-lg">No collection stats available for this period.</span>
+                                <span className="text-lg">No financial data available for this period.</span>
                             </div>
                         )}
+                        <div className="mt-6">
+                            {initiators && initiators.length > 0 ? (
+                                <Chart
+                                    type="bar"
+                                    height={400}
+                                    series={[
+                                        {
+                                            name: "Collection Volume",
+                                            data: initiators?.map((i) => i.collection_volume) || []
+                                        }
+                                    ]}
+                                    options={{
+                                        chart: { id: "initiator-collection-volume" },
+                                        xaxis: {
+                                            categories: initiators?.map((i) => i.name) || [],
+                                            title: { text: "Collectors name" }
+                                        },
+                                        yaxis: {
+                                            title: { text: "Amount Collected" },
+                                            labels: {
+                                                formatter: (val: number) => formatCurrency(val)
+                                            }
+                                        },
+                                        title: {
+                                            text: "Collections Stats",
+                                            align: "center"
+                                        },
+                                        legend: {
+                                            show: true,
+                                            formatter: (seriesName: string) => `Collection Volume (${seriesName})`
+                                        },
+                                        tooltip: {
+                                            y: {
+                                                formatter: (val: number) => formatCurrency(val)
+                                            }
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+                                    <span className="text-lg">No collection stats available for this period.</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="order-first lg:order-none lg:p-6 my-6">
+                        <InitiatorStats initiators={initiators} />
                     </div>
                 </div>
-                <div className="order-first lg:order-none lg:p-6 my-6">
-                    <InitiatorStats initiators={initiators} />
-                </div>
-            </div>
+            )}
         </>
     );
 };

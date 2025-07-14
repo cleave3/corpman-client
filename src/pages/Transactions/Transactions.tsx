@@ -48,7 +48,6 @@ const Transactions = () => {
         }
     }, [params]);
 
-    if (isLoading) return <TableLoader length={filterData.limit} />;
     return (
         <>
             <PageBreadcrumb pageTitle={`Transactions`} />
@@ -126,65 +125,119 @@ const Transactions = () => {
                     </div>
                 </Dropdown>
             </div>
+            {isLoading ? (
+                <TableLoader length={filterData.limit} />
+            ) : (
+                <>
+                    <div className="hidden lg:block max-w-full overflow-x-auto">
+                        <Pagination
+                            loaded={pageData.length}
+                            total={totalData}
+                            page={currentPage}
+                            limit={pageSize}
+                            nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
+                            prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
+                        />
+                    </div>
+                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                        <div className="hidden lg:block max-w-full overflow-x-auto">
+                            <div className="min-w-[1102px]">
+                                <Table>
+                                    {/* Table Header */}
+                                    <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                        <TableRow>
+                                            <TableCell isHeader className="">
+                                                ID
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Amount
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Type
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Status
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Description
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Initiator
+                                            </TableCell>
+                                            <TableCell isHeader className="">
+                                                Created At
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHeader>
 
-            <div className="hidden lg:block max-w-full overflow-x-auto">
-                <Pagination
-                    loaded={pageData.length}
-                    total={totalData}
-                    page={currentPage}
-                    limit={pageSize}
-                    nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                    prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                />
-            </div>
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                <div className="hidden lg:block max-w-full overflow-x-auto">
-                    <div className="min-w-[1102px]">
-                        <Table>
-                            {/* Table Header */}
-                            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                                <TableRow>
-                                    <TableCell isHeader className="">
-                                        ID
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Amount
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Type
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Status
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Description
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Initiator
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Created At
-                                    </TableCell>
-                                </TableRow>
-                            </TableHeader>
+                                    {/* Table Body */}
+                                    <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                        {pageData.map((transaction) => (
+                                            <TableRow
+                                                key={transaction.id}
+                                                onClick={() => {
+                                                    setSelectedTransaction(transaction);
+                                                    openModal();
+                                                }}
+                                            >
+                                                <TableCell className="">{transaction?.id}</TableCell>
+                                                <TableCell className="">{formatCurrency(transaction?.amount)}</TableCell>
+                                                <TableCell>
+                                                    {transaction?.transaction_type}
+                                                    {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
+                                                </TableCell>
+                                                <TableCell className="">
+                                                    <Badge
+                                                        variant="light"
+                                                        children={transaction?.status}
+                                                        color={
+                                                            transaction?.status === "completed"
+                                                                ? "success"
+                                                                : transaction?.status === "pending"
+                                                                ? "warning"
+                                                                : "error"
+                                                        }
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="">{transaction?.description}</TableCell>
+                                                <TableCell className="">{transaction?.initiator?.name}</TableCell>
+                                                <TableCell className="">{formatDate(transaction?.created_at, "llll")}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
 
-                            {/* Table Body */}
-                            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                {pageData.map((transaction) => (
-                                    <TableRow
+                        {/* Mobile Cards */}
+                        <div className="block lg:hidden px-2 py-4">
+                            <Pagination
+                                loaded={pageData.length}
+                                total={totalData}
+                                page={currentPage}
+                                limit={pageSize}
+                                nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
+                                prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
+                            />
+                            {pageData.length === 0 ? (
+                                <div className="text-center text-gray-400 dark:text-gray-500 py-8">No transactions found.</div>
+                            ) : (
+                                pageData.map((transaction) => (
+                                    <div
                                         key={transaction.id}
+                                        className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
                                         onClick={() => {
                                             setSelectedTransaction(transaction);
                                             openModal();
                                         }}
                                     >
-                                        <TableCell className="">{transaction?.id}</TableCell>
-                                        <TableCell className="">{formatCurrency(transaction?.amount)}</TableCell>
-                                        <TableCell>
-                                            {transaction?.transaction_type}
-                                            {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
-                                        </TableCell>
-                                        <TableCell className="">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="w-1/2">
+                                                {/* <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Amount</div> */}
+                                                <div className="text-sm font-bold text-gray-900 dark:text-success-600">
+                                                    {formatCurrency(transaction?.amount)}
+                                                </div>
+                                            </div>
                                             <Badge
                                                 variant="light"
                                                 children={transaction?.status}
@@ -196,84 +249,35 @@ const Transactions = () => {
                                                         : "error"
                                                 }
                                             />
-                                        </TableCell>
-                                        <TableCell className="">{transaction?.description}</TableCell>
-                                        <TableCell className="">{transaction?.initiator?.name}</TableCell>
-                                        <TableCell className="">{formatDate(transaction?.created_at, "llll")}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-1/2">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Type</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                    {transaction?.transaction_type}{" "}
+                                                    {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
+                                                </div>
+                                            </div>
+                                            <div className="w-1/2 mt-2">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                    {formatDate(transaction?.created_at, "lll")}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-full">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
-                </div>
-
-                {/* Mobile Cards */}
-                <div className="block lg:hidden px-2 py-4">
-                    <Pagination
-                        loaded={pageData.length}
-                        total={totalData}
-                        page={currentPage}
-                        limit={pageSize}
-                        nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                        prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                    />
-                    {pageData.length === 0 ? (
-                        <div className="text-center text-gray-400 dark:text-gray-500 py-8">No transactions found.</div>
-                    ) : (
-                        pageData.map((transaction) => (
-                            <div
-                                key={transaction.id}
-                                className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
-                                onClick={() => {
-                                    setSelectedTransaction(transaction);
-                                    openModal();
-                                }}
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-1/2">
-                                        {/* <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Amount</div> */}
-                                        <div className="text-sm font-bold text-gray-900 dark:text-success-600">
-                                            {formatCurrency(transaction?.amount)}
-                                        </div>
-                                    </div>
-                                    <Badge
-                                        variant="light"
-                                        children={transaction?.status}
-                                        color={
-                                            transaction?.status === "completed"
-                                                ? "success"
-                                                : transaction?.status === "pending"
-                                                ? "warning"
-                                                : "error"
-                                        }
-                                    />
-                                </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Type</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {transaction?.transaction_type}{" "}
-                                            {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
-                                        </div>
-                                    </div>
-                                    <div className="w-1/2 mt-2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {formatDate(transaction?.created_at, "lll")}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-full">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
+                </>
+            )}
             <Modal
                 isOpen={isOpen}
                 isFullscreen={notDesktop}

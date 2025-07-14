@@ -52,8 +52,6 @@ const Customers = () => {
 
     const totalData = data?.data?.total ?? 0;
 
-    if (isLoading) return <TableLoader length={filterData.limit} />;
-
     return (
         <>
             <PageBreadcrumb pageTitle={`Customers`} />
@@ -171,52 +169,55 @@ const Customers = () => {
                     prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
                 />
             </div>
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                <div className="hidden lg:block max-w-full overflow-x-auto  min-h-screen">
-                    <div className="min-w-[1102px]">
-                        <Table>
-                            {/* Table Header */}
-                            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                                <TableRow>
-                                    <TableCell isHeader className="">
-                                        Name (Code)
-                                    </TableCell>
-
-                                    <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+            {isLoading ? (
+                <TableLoader length={filterData.limit} />
+            ) : (
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                    <div className="hidden lg:block max-w-full overflow-x-auto  min-h-screen">
+                        <div className="min-w-[1102px]">
+                            <Table>
+                                {/* Table Header */}
+                                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                    <TableRow>
                                         <TableCell isHeader className="">
-                                            Current Balance
+                                            Name (Code)
                                         </TableCell>
-                                    </AccessWrapper>
-                                    <TableCell isHeader className="">
-                                        Customer Type
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Email
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        telephone
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Next Payment Date
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Address
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Created At
-                                    </TableCell>
-                                    <TableCell isHeader className="">
-                                        Created By
-                                    </TableCell>
-                                </TableRow>
-                            </TableHeader>
 
-                            {/* Table Body */}
-                            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                {pageData.map((customer, i) => (
-                                    <TableRow key={customer.id}>
-                                        <TableCell className="px-5 py-4 sm:px-6 text-start">
-                                            {/* <div className="flex items-center gap-3">
+                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                            <TableCell isHeader className="">
+                                                Current Balance
+                                            </TableCell>
+                                        </AccessWrapper>
+                                        <TableCell isHeader className="">
+                                            Customer Type
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Email
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            telephone
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Next Payment Date
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Address
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Created At
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Created By
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHeader>
+
+                                {/* Table Body */}
+                                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                    {pageData.map((customer, i) => (
+                                        <TableRow key={customer.id}>
+                                            <TableCell className="px-5 py-4 sm:px-6 text-start">
+                                                {/* <div className="flex items-center gap-3">
                                                 {customer?.image_url ? (
                                                     <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center">
                                                         <img
@@ -238,109 +239,110 @@ const Customers = () => {
                                                     </span>
                                                 </div>
                                             </div> */}
-                                            {customer?.name}{" "}
-                                            {customer?.customer_code ? `(${customer?.customer_code})` : ""}
-                                        </TableCell>
-                                        {/* <TableCell className="font-bold">{customer?.customer_code ?? "-"}</TableCell> */}
-                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                            <TableCell className="">{formatCurrency(customer?.balance)}</TableCell>
-                                        </AccessWrapper>
-                                        <TableCell className="">
-                                            <span
-                                                className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                                    customer.customer_type === "premium"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-blue-100 text-blue-800"
-                                                }`}
-                                            >
-                                                {customer.customer_type === "premium" ? "Premium" : "Regular"}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="">{customer?.email ?? "-"}</TableCell>
-                                        <TableCell className="">{customer?.phone}</TableCell>
-                                        <TableCell className="">{formatDate(customer?.next_payment_date)}</TableCell>
-                                        <TableCell className="">{customer?.address}</TableCell>
-                                        <TableCell className="">{formatDate(customer?.created_at, "llll")}</TableCell>
-                                        <TableCell className="">{customer?.creator?.name}</TableCell>
-                                        <AccessWrapper
-                                            componentPermissions={[
-                                                PERMISSION_VALUES.customers.update_customers,
-                                                PERMISSION_VALUES.customers.view_balances
-                                            ]}
-                                        >
-                                            <TableCell>
-                                                <div className="relative inline-block">
-                                                    <button
-                                                        className="dropdown-toggle"
-                                                        onClick={() => {
-                                                            setInex(i + 1);
-                                                            toggleDropdown();
-                                                        }}
-                                                    >
-                                                        <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
-                                                    </button>
-                                                    <Dropdown
-                                                        isOpen={openDropDown && index === i + 1}
-                                                        onClose={closeDropdown}
-                                                        className="w-40 p-2"
-                                                    >
-                                                        <AccessWrapper
-                                                            componentPermissions={[PERMISSION_VALUES.customers.update_customers]}
-                                                        >
-                                                            <DropdownItem
-                                                                onItemClick={() => {
-                                                                    setSelectedCustomer(customer);
-                                                                    openModal();
-                                                                    closeDropdown();
-                                                                }}
-                                                                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                            >
-                                                                Edit Customer
-                                                            </DropdownItem>
-                                                        </AccessWrapper>
-                                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                                            <DropdownItem
-                                                                onItemClick={() => {
-                                                                    setSelectedCustomer(customer);
-                                                                    setDrawerOpen(true);
-                                                                    closeDropdown();
-                                                                }}
-                                                                className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                            >
-                                                                Wallet History
-                                                            </DropdownItem>
-                                                        </AccessWrapper>
-                                                    </Dropdown>
-                                                </div>
+                                                {customer?.name} {customer?.customer_code ? `(${customer?.customer_code})` : ""}
                                             </TableCell>
-                                        </AccessWrapper>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                            {/* <TableCell className="font-bold">{customer?.customer_code ?? "-"}</TableCell> */}
+                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                                <TableCell className="">{formatCurrency(customer?.balance)}</TableCell>
+                                            </AccessWrapper>
+                                            <TableCell className="">
+                                                <span
+                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                                                        customer.customer_type === "premium"
+                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            : "bg-blue-100 text-blue-800"
+                                                    }`}
+                                                >
+                                                    {customer.customer_type === "premium" ? "Premium" : "Regular"}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="">{customer?.email ?? "-"}</TableCell>
+                                            <TableCell className="">{customer?.phone}</TableCell>
+                                            <TableCell className="">{formatDate(customer?.next_payment_date)}</TableCell>
+                                            <TableCell className="">{customer?.address}</TableCell>
+                                            <TableCell className="">{formatDate(customer?.created_at, "llll")}</TableCell>
+                                            <TableCell className="">{customer?.creator?.name}</TableCell>
+                                            <AccessWrapper
+                                                componentPermissions={[
+                                                    PERMISSION_VALUES.customers.update_customers,
+                                                    PERMISSION_VALUES.customers.view_balances
+                                                ]}
+                                            >
+                                                <TableCell>
+                                                    <div className="relative inline-block">
+                                                        <button
+                                                            className="dropdown-toggle"
+                                                            onClick={() => {
+                                                                setInex(i + 1);
+                                                                toggleDropdown();
+                                                            }}
+                                                        >
+                                                            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
+                                                        </button>
+                                                        <Dropdown
+                                                            isOpen={openDropDown && index === i + 1}
+                                                            onClose={closeDropdown}
+                                                            className="w-40 p-2"
+                                                        >
+                                                            <AccessWrapper
+                                                                componentPermissions={[PERMISSION_VALUES.customers.update_customers]}
+                                                            >
+                                                                <DropdownItem
+                                                                    onItemClick={() => {
+                                                                        setSelectedCustomer(customer);
+                                                                        openModal();
+                                                                        closeDropdown();
+                                                                    }}
+                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                                                                >
+                                                                    Edit Customer
+                                                                </DropdownItem>
+                                                            </AccessWrapper>
+                                                            <AccessWrapper
+                                                                componentPermissions={[PERMISSION_VALUES.customers.view_balances]}
+                                                            >
+                                                                <DropdownItem
+                                                                    onItemClick={() => {
+                                                                        setSelectedCustomer(customer);
+                                                                        setDrawerOpen(true);
+                                                                        closeDropdown();
+                                                                    }}
+                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                                                                >
+                                                                    Wallet History
+                                                                </DropdownItem>
+                                                            </AccessWrapper>
+                                                        </Dropdown>
+                                                    </div>
+                                                </TableCell>
+                                            </AccessWrapper>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
-                </div>
-                <div className="block lg:hidden px-2 py-4">
-                    <Pagination
-                        loaded={pageData.length}
-                        total={totalData}
-                        page={currentPage}
-                        limit={pageSize}
-                        nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                        prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                    />
-                    {pageData.length === 0 ? (
-                        <div className="text-center text-gray-400 dark:text-gray-500 py-8">No customers found.</div>
-                    ) : (
-                        pageData.map((customer) => (
-                            <div
-                                key={customer.id}
-                                className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-1/2">
-                                        <div className="flex items-center gap-3">
-                                            {/* {customer?.image_url ? (
+                    <div className="block lg:hidden px-2 py-4">
+                        <Pagination
+                            loaded={pageData.length}
+                            total={totalData}
+                            page={currentPage}
+                            limit={pageSize}
+                            nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
+                            prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
+                        />
+                        {pageData.length === 0 ? (
+                            <div className="text-center text-gray-400 dark:text-gray-500 py-8">No customers found.</div>
+                        ) : (
+                            pageData.map((customer) => (
+                                <div
+                                    key={customer.id}
+                                    className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="w-1/2">
+                                            <div className="flex items-center gap-3">
+                                                {/* {customer?.image_url ? (
                                                 <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center">
                                                     <img
                                                         width={40}
@@ -355,99 +357,100 @@ const Customers = () => {
                                                     {`${customer.first_name?.[0] ?? ""}${customer.last_name?.[0] ?? ""}`}
                                                 </div>
                                             )} */}
-                                            <div>
-                                                <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                    {customer?.name}
-                                                </span>
-                                                <span
-                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                                        customer.customer_type === "premium"
-                                                            ? "bg-yellow-100 text-yellow-800"
-                                                            : "bg-blue-100 text-blue-800"
-                                                    }`}
-                                                >
-                                                    {customer.customer_type === "premium" ? "Premium" : "Regular"}
-                                                </span>
+                                                <div>
+                                                    <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                                                        {customer?.name}
+                                                    </span>
+                                                    <span
+                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                                                            customer.customer_type === "premium"
+                                                                ? "bg-yellow-100 text-yellow-800"
+                                                                : "bg-blue-100 text-blue-800"
+                                                        }`}
+                                                    >
+                                                        {customer.customer_type === "premium" ? "Premium" : "Regular"}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
+                                        <div className="w-1/2 flex justify-end">
+                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.update_customers]}>
+                                                <Button
+                                                    variant="ghost"
+                                                    // size="icon"
+                                                    className="p-1 h-7 w-7 mx-2"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setSelectedCustomer(customer);
+                                                        openModal();
+                                                    }}
+                                                >
+                                                    <PencilIcon className="h-4 w-4" />
+                                                </Button>
+                                            </AccessWrapper>
+                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                                <Button
+                                                    variant="secondary"
+                                                    className="p-1 h-7 w-7"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setSelectedCustomer(customer);
+                                                        setDrawerOpen(true);
+                                                    }}
+                                                >
+                                                    <ListBulletIcon className="h-4 w-4" />
+                                                </Button>
+                                            </AccessWrapper>
+                                        </div>
                                     </div>
-                                    <div className="w-1/2 flex justify-end">
-                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.update_customers]}>
-                                            <Button
-                                                variant="ghost"
-                                                // size="icon"
-                                                className="p-1 h-7 w-7 mx-2"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setSelectedCustomer(customer);
-                                                    openModal();
-                                                }}
-                                            >
-                                                <PencilIcon className="h-4 w-4" />
-                                            </Button>
-                                        </AccessWrapper>
-                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                            <Button
-                                                variant="secondary"
-                                                className="p-1 h-7 w-7"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setSelectedCustomer(customer);
-                                                    setDrawerOpen(true);
-                                                }}
-                                            >
-                                                <ListBulletIcon className="h-4 w-4" />
-                                            </Button>
-                                        </AccessWrapper>
+                                    <div className="flex flex-wrap gap-y-2 mb-2">
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Balance</div>
+                                            <div className="text-sm font-bold text-gray-900 dark:text-success-600">
+                                                {formatCurrency(customer?.balance)}
+                                            </div>
+                                        </div>
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Code</div>
+                                            <div className="text-sm text-black dark:text-gray-200 font-bold">
+                                                {customer?.customer_code ?? "-"}
+                                            </div>
+                                        </div>
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Telephone</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.phone ?? "-"}</div>
+                                        </div>
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Next Payment Date</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                {formatDate(customer?.next_payment_date)}
+                                            </div>
+                                        </div>
+                                        <div className="w-full">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Email</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.email ?? "-"}</div>
+                                        </div>
+                                        <div className="w-full">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Address</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.address ?? "-"}</div>
+                                        </div>
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                {formatDate(customer?.created_at, "lll")}
+                                            </div>
+                                        </div>
+                                        <div className="w-1/2">
+                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created By</div>
+                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.creator?.name ?? "-"}</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Balance</div>
-                                        <div className="text-sm font-bold text-gray-900 dark:text-success-600">
-                                            {formatCurrency(customer?.balance)}
-                                        </div>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Code</div>
-                                        <div className="text-sm text-black dark:text-gray-200 font-bold">
-                                            {customer?.customer_code ?? "-"}
-                                        </div>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Telephone</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.phone ?? "-"}</div>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Next Payment Date</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {formatDate(customer?.next_payment_date)}
-                                        </div>
-                                    </div>
-                                    <div className="w-full">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Email</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.email ?? "-"}</div>
-                                    </div>
-                                    <div className="w-full">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Address</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.address ?? "-"}</div>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {formatDate(customer?.created_at, "lll")}
-                                        </div>
-                                    </div>
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created By</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.creator?.name ?? "-"}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                            ))
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
             <Modal
                 isOpen={isOpen}
                 onClose={() => {
