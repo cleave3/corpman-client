@@ -41,7 +41,7 @@ export default function Home() {
                     <TransactionStats />
                 </div>
                 <AccessWrapper componentPermissions={[PERMISSION_VALUES.dashboard.dashboard_chart]}>
-                    <div className="col-span-12">
+                    <div className="col-span-12 mb-20">
                         <YearlyStats />
                     </div>
                 </AccessWrapper>
