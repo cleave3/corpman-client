@@ -55,7 +55,7 @@ const MyEntries = () => {
                         value={year}
                         onChange={(e) => setYear(Number(e.target.value))}
                     >
-                        {Array.from({ length: new Date().getFullYear() - 2023 }, (_, i) => (
+                        {Array.from({ length: new Date().getFullYear() - 2024 }, (_, i) => (
                             <option key={i} value={new Date().getFullYear() - i}>
                                 {new Date().getFullYear() - i}
                             </option>

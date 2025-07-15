@@ -33,7 +33,7 @@ const StatsCard = ({ title, isLoading = false, value, icon = <GroupIcon classNam
         <>
             <div
                 {...commonProps}
-                className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03] md:p-5 cursor-pointer lg:block hidden"
+                className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-white/[0.03] md:p-5 cursor-pointer lg:block hidden"
             >
                 <div className="absolute -right-4 -top-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-500/10 dark:bg-blue-500/20"></div>
                 <div className="absolute -bottom-4 -left-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-500/10 dark:bg-blue-500/20"></div>

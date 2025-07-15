@@ -6,7 +6,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { menuPermissions, PERMISSION_VALUES, ROUTES } from "../utils";
 import { useAuthStore } from "../hooks/useAuthStore";
 import useWidth from "../hooks/useWidth";
-import { useTheme } from "../context/ThemeContext";
+// import { useTheme } from "../context/ThemeContext";
 import AccessWrapper from "../components/AccessController";
 
 type NavItem = {
@@ -93,7 +93,7 @@ const AppSidebar: React.FC = () => {
 
     const { isMobile } = useWidth();
 
-    const { theme } = useTheme();
+    // const { theme } = useTheme();
 
     const [openSubmenu, setOpenSubmenu] = useState<{
         type: "main" | "others";
@@ -270,11 +270,11 @@ const AppSidebar: React.FC = () => {
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="flex justify-start my-5 ps-4">
+            {/* <div className="flex justify-start my-5 ps-4">
                 <img src={theme === "light" ? "/corpman_lightmode.png" : "/corpman_darkmode.png"} alt="Logo" width={60} height={60} />
-            </div>
+            </div> */}
             <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-                <nav className="mb-6">
+                <nav className="mb-6 mt-10">
                     <div className="flex flex-col gap-4">
                         <div>{renderMenuItems(navItems, "main")}</div>
                     </div>

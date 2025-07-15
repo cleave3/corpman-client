@@ -9,7 +9,7 @@ export default function TransactionStats() {
     const stats = data?.data;
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-6 transition-all duration-300 ease-in-out">
             <div className="flex justify-between">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Transaction Stats</h3>
