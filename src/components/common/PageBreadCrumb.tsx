@@ -1,7 +1,8 @@
+import { ReactNode } from "react";
 import { Link } from "react-router";
 
 interface BreadcrumbProps {
-    pageTitle: string;
+    pageTitle: ReactNode;
     showNavigation?: boolean;
 }
 
