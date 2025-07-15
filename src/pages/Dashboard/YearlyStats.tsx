@@ -1,7 +1,7 @@
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useTransactionYearStats } from "../../hooks/useApiHooks";
-import { formatCurrency } from "../../utils";
+import { formatCurrency, formatCurrencyShort } from "../../utils";
 import { useState } from "react";
 
 export default function MonthlyTransactionChart() {
@@ -51,6 +51,15 @@ export default function MonthlyTransactionChart() {
             fontFamily: "Outfit"
         },
         yaxis: {
+            labels: {
+                formatter: (val: number) => formatCurrencyShort(val),
+                style: {
+                    fontFamily: "Outfit, sans-serif"
+                }
+            },
+            axisBorder: {
+                show: false
+            },
             title: {
                 text: undefined
             }
@@ -101,11 +110,11 @@ export default function MonthlyTransactionChart() {
 
             <div className="max-w-full overflow-x-auto custom-scrollbar">
                 {isLoading ? (
-                    <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+                    <div className="-ml-5 xl:min-w-full pl-2">
                         <div className="h-[180px] w-full bg-gray-100 animate-pulse rounded-md" />
                     </div>
                 ) : (
-                    <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+                    <div className="-ml-5 xl:min-w-full pl-2">
                         <Chart options={options} series={series} type="bar" height={400} />
                     </div>
                 )}
