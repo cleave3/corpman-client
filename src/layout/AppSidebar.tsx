@@ -281,7 +281,7 @@ const AppSidebar: React.FC = () => {
                 </nav>
             </div>
             <span
-                className="flex items-center gap-3 px-3 py-2 text-red-500 rounded-lg group text-theme-sm cursor-pointer absolute lg:bottom-5 bottom-20 left-4 w-full"
+                className="flex items-center gap-3 px-3 py-2 text-red-500 rounded-lg group text-theme-sm cursor-pointer absolute lg:bottom-5 bottom-40 left-4 w-full"
                 onClick={logout}
             >
                 <ArrowLeftEndOnRectangleIcon className="w-5 h-5 text-red-500" />

@@ -28,7 +28,7 @@ export default function Home() {
             <PageBreadcrumb
                 pageTitle={
                     <span className="text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                        Good {timeOfDay}, <span className="text-brand-600">{user?.first_name}</span>
+                        Good {timeOfDay}, <span className="text-blue-500">{user?.first_name}</span>
                     </span>
                 }
                 showNavigation={false}
