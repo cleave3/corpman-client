@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { DocumentPlusIcon } from "@heroicons/react/24/outline";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { TableLoader, Table, TableHeader, TableRow, TableCell, TableBody, Pagination } from "../../components/ui/table";
 import { useTransactions } from "../../hooks/useApiHooks";
@@ -13,7 +13,6 @@ import TransactionDetail from "./TransactionDetail";
 import Input from "../../components/form/input/InputField";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import Button from "../../components/button/Button";
 import { Dropdown } from "../../components/ui/dropdown/Dropdown";
 import SearchableSelect from "../../components/form/SearchableSelect";
 import AccessWrapper from "../../components/AccessController";
@@ -53,12 +52,14 @@ const Transactions = () => {
             <PageBreadcrumb pageTitle={`Transactions`} />
             <div className="relative flex justify-between flex-wrap mb-5">
                 <AccessWrapper componentPermissions={[PERMISSION_VALUES.transaction.initiate_transaction]}>
-                    <Button
+                    <button
+                        type="button"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
                         onClick={() => navigate(ROUTES.NEW_TRANSACTIONS)}
-                        variant="primary"
-                        leftIcon={<PlusIcon className="size-6" />}
-                        children="New Transaction"
-                    />
+                    >
+                        <DocumentPlusIcon className="size-6" />
+                        New Transaction
+                    </button>
                 </AccessWrapper>
                 <button
                     type="button"

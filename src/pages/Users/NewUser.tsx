@@ -191,7 +191,14 @@ const NewUser = ({ user, isOpen, openModal, closeModal }: NewUserProps) => {
         <>
             <div className="relative flex justify-between items-center flex-wrap mb-5">
                 <AccessWrapper componentPermissions={[PERMISSION_VALUES.users.create_user]}>
-                    <Button onClick={openModal} variant="primary" leftIcon={<PlusIcon className="size-6" />} children="New User" />
+                    <button
+                        type="button"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
+                        onClick={openModal}
+                    >
+                        <PlusIcon className="size-6" />
+                        New User
+                    </button>
                 </AccessWrapper>
             </div>
             <Drawer

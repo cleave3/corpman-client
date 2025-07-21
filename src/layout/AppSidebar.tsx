@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChartPieIcon, BookOpenIcon, ArrowLeftEndOnRectangleIcon } from "@heroicons/react/24/outline";
+import { ChartPieIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router";
 import { ChevronDownIcon, GridIcon, ListIcon, PageIcon, TeamIcon, UserGroup, UserIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { menuPermissions, PERMISSION_VALUES, ROUTES } from "../utils";
-import { useAuthStore } from "../hooks/useAuthStore";
+// import { useAuthStore } from "../hooks/useAuthStore";
 import useWidth from "../hooks/useWidth";
 // import { useTheme } from "../context/ThemeContext";
 import AccessWrapper from "../components/AccessController";
@@ -15,6 +15,7 @@ type NavItem = {
     path?: string;
     subItems?: { name: string; path: string; pro?: boolean; new?: boolean; componentPermissions?: string[] }[];
     componentPermissions?: string[];
+    hideOnMobile?: boolean;
 };
 
 const navItems: NavItem[] = [
@@ -22,13 +23,15 @@ const navItems: NavItem[] = [
         icon: <GridIcon />,
         name: "Dashboard",
         path: ROUTES.DASHBOARD,
-        componentPermissions: menuPermissions("dashboard")
+        componentPermissions: menuPermissions("dashboard"),
+        hideOnMobile: true
     },
     {
         icon: <UserGroup />,
         name: "Customers",
         path: ROUTES.CUSTOMERS,
-        componentPermissions: menuPermissions("customers")
+        componentPermissions: menuPermissions("customers"),
+        hideOnMobile: true
     },
     {
         icon: <PageIcon />,
@@ -57,7 +60,8 @@ const navItems: NavItem[] = [
         icon: <ChartPieIcon />,
         name: "Performance Metrics",
         path: ROUTES.METRICS,
-        componentPermissions: menuPermissions("metrics")
+        componentPermissions: menuPermissions("metrics"),
+        hideOnMobile: true
     },
     {
         name: "Team",
@@ -75,13 +79,15 @@ const navItems: NavItem[] = [
         icon: <BookOpenIcon />,
         name: "My Entries",
         path: ROUTES.MY_ENTRIES,
-        componentPermissions: []
+        componentPermissions: [],
+        hideOnMobile: true
     },
     {
         icon: <UserIcon />,
         name: "Profile",
         path: ROUTES.PROFILE,
-        componentPermissions: []
+        componentPermissions: [],
+        hideOnMobile: true
     }
 ];
 
@@ -89,7 +95,7 @@ const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
     const location = useLocation();
 
-    const { logout } = useAuthStore((state) => state);
+    // const { logout } = useAuthStore((state) => state);
 
     const { isMobile } = useWidth();
 
@@ -151,7 +157,7 @@ const AppSidebar: React.FC = () => {
         <ul className="flex flex-col gap-4">
             {items.map((nav, index) => (
                 <AccessWrapper key={index} componentPermissions={nav.componentPermissions}>
-                    <li key={nav.name}>
+                    <li key={nav.name} className={`${nav.hideOnMobile ? "lg:block hidden" : ""}`}>
                         {nav.subItems ? (
                             <button
                                 onClick={() => handleSubmenuToggle(index, menuType)}
@@ -263,7 +269,7 @@ const AppSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-auto lg:h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -280,13 +286,13 @@ const AppSidebar: React.FC = () => {
                     </div>
                 </nav>
             </div>
-            <span
-                className="flex items-center gap-3 px-3 py-2 text-red-500 rounded-lg group text-theme-sm cursor-pointer absolute lg:bottom-5 bottom-40 left-4 w-full"
+            {/* <span
+                className="lg:flex items-center gap-3 px-3 py-2 text-red-500 rounded-lg group text-theme-sm cursor-pointer absolute lg:bottom-5 bottom-40 left-4 w-full hidden"
                 onClick={logout}
             >
                 <ArrowLeftEndOnRectangleIcon className="w-5 h-5 text-red-500" />
                 {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">Sign out</span>}
-            </span>
+            </span> */}
         </aside>
     );
 };

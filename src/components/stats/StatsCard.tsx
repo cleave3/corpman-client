@@ -35,13 +35,10 @@ const StatsCard = ({ title, isLoading = false, value, icon = <GroupIcon classNam
                 {...commonProps}
                 className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-white/[0.03] md:p-5 cursor-pointer lg:block hidden"
             >
-                <div className="absolute -right-4 -top-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-500/10 dark:bg-blue-500/20"></div>
-                <div className="absolute -bottom-4 -left-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-500/10 dark:bg-blue-500/20"></div>
-
                 <div className="relative z-10 flex flex-col items-start">
-                    <div className="flex items-center justify-center w-12 h-7 mb-4 rounded-xl bg-blue-100 dark:bg-blue-900/50">{icon}</div>
+                    <div className="flex items-center justify-center size-10 mb-2 rounded-xl bg-blue-100 dark:bg-blue-900/50">{icon}</div>
                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</span>
-                    <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                    <h4 className="mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90">
                         {isLoading ? <div className="h-6 w-16 bg-gray-200 rounded animate-pulse dark:bg-gray-700" /> : value}
                     </h4>
                 </div>

@@ -297,4 +297,18 @@ export default class ApiService {
         link.parentNode?.removeChild(link);
         window.URL.revokeObjectURL(url);
     }
+
+    static async downloadCustomerList(): Promise<void> {
+        const response = await api.get(`/api/v1/customer/export`, { responseType: "blob" });
+        const url = window.URL.createObjectURL(
+            new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+        );
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `customer_list${new Date().getTime()}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
 }

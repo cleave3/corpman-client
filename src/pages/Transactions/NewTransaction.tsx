@@ -73,7 +73,7 @@ const NewTransaction = () => {
             <PageBreadcrumb pageTitle={`Add Transaction`} />
             <div>
                 <form className="flex flex-col" onSubmit={handleSubmit}>
-                    <div className="custom-scrollbar h-auto overflow-y-auto px-2 pb-3">
+                    <div className="px-2 pb-3">
                         <div className="mt-7">
                             <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                                 <div className="col-span-2 lg:col-span-1">
@@ -124,7 +124,7 @@ const NewTransaction = () => {
                                                 value={transaction?.meta_data?.customer_id}
                                                 options={(data?.data || [])?.map((c) => ({
                                                     value: c.id,
-                                                    label: `${c.name} [${c.customer_code}] - (${c.phone})` // [${formatCurrency(c.balance)}]`
+                                                    label: `${c.name} [${c.customer_code}] ${c.phone ? ` - [${c.phone}]` : ""}` // [${formatCurrency(c.balance)}]`
                                                 }))}
                                                 onChange={(value) =>
                                                     setTransaction((prev) => ({

@@ -1,6 +1,6 @@
 import { useAuthStore } from "../../hooks/useAuthStore";
 import Badge from "../../components/ui/badge/Badge";
-import { EyeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftEndOnRectangleIcon, EyeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { useModal } from "../../hooks/useModal";
 import { useState } from "react";
 import Input from "../../components/form/input/InputField";
@@ -17,6 +17,7 @@ export default function UserMetaCard() {
 
     const { openModal, closeModal, isOpen } = useModal();
 
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setForm((prev) => ({
@@ -25,7 +26,7 @@ export default function UserMetaCard() {
         }));
     };
 
-    const user = useAuthStore((state) => state.user);
+    const { logout, user } = useAuthStore((state) => state);
 
     const { isPending, mutate } = useChangePassword();
 
@@ -93,13 +94,22 @@ export default function UserMetaCard() {
                             </div>
                         </div>
                     </div>
-                    <button
-                        onClick={openModal}
-                        className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto whitespace-nowrap"
-                    >
-                        <LockClosedIcon className="size-4" />
-                        Change password
-                    </button>
+                    <div className="flex align-items-center gap-2">
+                        <button
+                            onClick={openModal}
+                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto whitespace-nowrap"
+                        >
+                            <LockClosedIcon className="size-4" />
+                            Change password
+                        </button>
+                        <button
+                            onClick={logout}
+                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto whitespace-nowrap"
+                        >
+                            <ArrowLeftEndOnRectangleIcon className="w-5 h-5 text-red-500" />
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </div>
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">

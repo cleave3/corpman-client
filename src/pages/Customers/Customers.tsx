@@ -4,7 +4,7 @@ import { useCustomers } from "../../hooks/useApiHooks";
 import { formatCurrency, PERMISSION_VALUES } from "../../utils";
 import { formatDate } from "../../utils/date";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import { PlusIcon, MagnifyingGlassIcon, ArrowPathIcon, PencilIcon, ListBulletIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon, ArrowPathIcon, PencilIcon, ListBulletIcon, ArrowDownTrayIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 import Button from "../../components/button/Button";
 import NewCustomer from "./NewCustomer";
 import { useModal } from "../../hooks/useModal";
@@ -18,6 +18,8 @@ import WalletHistory from "./WalletHistory";
 import useWidth from "../../hooks/useWidth";
 import SearchableSelect from "../../components/form/SearchableSelect";
 import AccessWrapper from "../../components/AccessController";
+import { toast } from "react-toastify";
+import ApiService from "../../api/apiService";
 
 const Customers = () => {
     const [showFilters, setShowFilters] = useState(false);
@@ -52,14 +54,43 @@ const Customers = () => {
 
     const totalData = data?.data?.total ?? 0;
 
+    const downloadReport = async () => {
+        await toast.promise(async () => await ApiService.downloadCustomerList(), {
+            pending: "Exporting customer list...",
+            success: "List Exported successfully",
+            error: "Error downloading customer list. Try again"
+        });
+    };
+
     return (
         <>
             <PageBreadcrumb pageTitle={`Customers`} />
             <div className="relative flex justify-between items-center flex-wrap mb-5">
-                <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.create_customers]}>
-                    <Button onClick={openModal} variant="primary" leftIcon={<PlusIcon className="size-6" />} children="New Customer" />
-                </AccessWrapper>
-                <div className="flex items-center justify-end mt-3">
+                <div className="flex align-center gap-x-2">
+                    <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.create_customers]}>
+                        <button
+                            type="button"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
+                            onClick={openModal}
+                        >
+                            <UserPlusIcon className="size-6" />
+                            New Customer
+                        </button>
+                    </AccessWrapper>
+                    <AccessWrapper
+                        componentPermissions={[PERMISSION_VALUES.customers.view_customers, PERMISSION_VALUES.customers.view_balances]}
+                    >
+                        <button
+                            type="button"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-700 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
+                            onClick={downloadReport}
+                        >
+                            <ArrowDownTrayIcon className="size-4" />
+                            Export
+                        </button>
+                    </AccessWrapper>
+                </div>
+                <div className="flex items-center justify-end mt-3 gap-5">
                     <button
                         type="button"
                         className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
