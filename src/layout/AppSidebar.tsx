@@ -60,8 +60,7 @@ const navItems: NavItem[] = [
         icon: <ChartPieIcon />,
         name: "Performance Metrics",
         path: ROUTES.METRICS,
-        componentPermissions: menuPermissions("metrics"),
-        hideOnMobile: true
+        componentPermissions: menuPermissions("metrics")
     },
     {
         name: "Team",
