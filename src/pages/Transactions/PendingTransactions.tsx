@@ -302,6 +302,14 @@ const PendingTransactions = () => {
                                                 <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
                                             </div>
                                         </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-full">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Initiator</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                    {transaction?.initiator?.name}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))
                             )}
