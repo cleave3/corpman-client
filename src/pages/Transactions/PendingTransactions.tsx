@@ -42,6 +42,7 @@ const PendingTransactions = () => {
     const { data, isLoading } = usePendingTransactions(userId);
 
     const { mutate: aMutate } = useApproveTransaction();
+
     const { mutate: dMutate } = useDeclineTransaction();
 
     const { notDesktop } = useWidth();
@@ -58,6 +59,10 @@ const PendingTransactions = () => {
 
     const pageData = data?.data?.transactions ?? [];
 
+    const users = [{ value: "", label: "All" }].concat(
+        userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` })) ?? []
+    );
+
     return (
         <>
             <div>
@@ -70,9 +75,7 @@ const PendingTransactions = () => {
                             </label>
                             <SearchableSelect
                                 value={userId}
-                                options={[{ value: "", label: "All" }].concat(
-                                    userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
-                                )}
+                                options={users}
                                 placeholder="Initiator"
                                 onChange={(value) => setUserId(value)}
                                 className="dark:bg-dark-900 w-40"

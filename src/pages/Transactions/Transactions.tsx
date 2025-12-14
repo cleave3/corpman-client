@@ -49,6 +49,10 @@ const Transactions = () => {
         }
     }, [params]);
 
+    const users = [{ value: "", label: "All" }].concat(
+        userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` })) ?? []
+    );
+
     return (
         <>
             <PageBreadcrumb pageTitle={`Transactions`} />
@@ -88,9 +92,7 @@ const Transactions = () => {
                             </label>
                             <SearchableSelect
                                 value={filterData.user_id}
-                                options={[{ value: "", label: "All" }].concat(
-                                    userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
-                                )}
+                                options={users}
                                 placeholder="Initiator"
                                 onChange={(value) => setFilterData((prev) => ({ ...prev, user_id: value }))}
                                 className="dark:bg-dark-900 w-40"
