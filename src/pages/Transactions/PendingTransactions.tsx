@@ -20,7 +20,6 @@ import useWidth from "../../hooks/useWidth";
 import SearchableSelect from "../../components/form/SearchableSelect";
 
 const PendingTransactions = () => {
-    const [showFilters, setShowFilters] = useState(false);
     const [userId, setUserId] = useState("");
     const [openDropDown, setOpenDropDown] = useState(false);
     const [index, setInex] = useState(0);
@@ -59,85 +58,70 @@ const PendingTransactions = () => {
 
     const pageData = data?.data?.transactions ?? [];
 
-    // const isPending = aIspending || dIspending;
-
-    if (isLoading) return <TableLoader />;
     return (
         <>
             <div>
                 <PageBreadcrumb pageTitle={`Pending Transactions`} />
-                <div className="flex justify-end">
-                    <button
-                        type="button"
-                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                        onClick={() => setShowFilters((prev) => !prev)}
-                        aria-label="Show Filters"
-                    >
-                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="text-gray-700 dark:text-white">
-                            <path
-                                d="M3 5h18M6 12h12M10 19h4"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                <div className="flex">
+                    <div className="my-2">
+                        <div className="flex flex-col">
+                            <label className="text-gray-100 min-w-[110px]" htmlFor="transaction-status">
+                                Filter by Initiator
+                            </label>
+                            <SearchableSelect
+                                value={userId}
+                                options={[{ value: "", label: "All" }].concat(
+                                    userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
+                                )}
+                                placeholder="Initiator"
+                                onChange={(value) => setUserId(value)}
+                                className="dark:bg-dark-900 w-40"
                             />
-                        </svg>
-                    </button>
-
-                    <Dropdown isOpen={showFilters} onClose={() => setShowFilters((prev) => !prev)} className="p-2">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
-                                    Initiator
-                                </label>
-                                <SearchableSelect
-                                    value={userId}
-                                    options={[{ value: "", label: "All" }].concat(
-                                        userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
-                                    )}
-                                    placeholder="Initiator"
-                                    onChange={(value) => setUserId(value)}
-                                    className="dark:bg-dark-900 w-40"
-                                />
-                            </div>
                         </div>
-                    </Dropdown>
+                    </div>
                 </div>
             </div>
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                {/* Desktop/Tablets Table */}
-                <div className="hidden lg:block max-w-full overflow-x-auto min-h-screen">
-                    {pageData.length === 0 ? (
-                        <div className="text-center text-gray-400 dark:text-gray-500 py-8">No pending transactions found.</div>
-                    ) : (
-                        <div className="min-w-[1102px]">
-                            <Table>
-                                {/* Table Header */}
-                                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                                    <TableRow>
-                                        <TableCell isHeader>ID</TableCell>
-                                        <TableCell isHeader>Amount</TableCell>
-                                        <TableCell isHeader>Charges</TableCell>
-                                        <TableCell isHeader>Type</TableCell>
-                                        {/* <TableCell isHeader>Status</TableCell> */}
-                                        <TableCell isHeader>Description</TableCell>
-                                        <TableCell isHeader>Initiator</TableCell>
-                                        <TableCell isHeader>Created At</TableCell>
-                                        <TableCell isHeader>{""}</TableCell>
-                                    </TableRow>
-                                </TableHeader>
-                                {/* Table Body */}
-                                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                    {pageData.map((transaction, i) => (
-                                        <TableRow key={transaction.id} className="cursor-pointer">
-                                            <TableCell>{transaction?.id}</TableCell>
-                                            <TableCell>{formatCurrency(transaction?.amount)}</TableCell>
-                                            <TableCell>{transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}</TableCell>
-                                            <TableCell>
-                                                {transaction?.transaction_type}
-                                                {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
-                                            </TableCell>
-                                            {/* <TableCell>
+                {isLoading ? (
+                    <TableLoader length={10} />
+                ) : (
+                    <>
+                        {" "}
+                        {/* Desktop/Tablets Table */}
+                        <div className="hidden lg:block max-w-full overflow-x-auto min-h-screen">
+                            {pageData.length === 0 ? (
+                                <div className="text-center text-gray-400 dark:text-gray-500 py-8">No pending transactions found.</div>
+                            ) : (
+                                <div className="min-w-[1102px]">
+                                    <Table>
+                                        {/* Table Header */}
+                                        <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                            <TableRow>
+                                                <TableCell isHeader>ID</TableCell>
+                                                <TableCell isHeader>Amount</TableCell>
+                                                <TableCell isHeader>Charges</TableCell>
+                                                <TableCell isHeader>Type</TableCell>
+                                                {/* <TableCell isHeader>Status</TableCell> */}
+                                                <TableCell isHeader>Description</TableCell>
+                                                <TableCell isHeader>Initiator</TableCell>
+                                                <TableCell isHeader>Created At</TableCell>
+                                                <TableCell isHeader>{""}</TableCell>
+                                            </TableRow>
+                                        </TableHeader>
+                                        {/* Table Body */}
+                                        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                            {pageData.map((transaction, i) => (
+                                                <TableRow key={transaction.id} className="cursor-pointer">
+                                                    <TableCell>{transaction?.id}</TableCell>
+                                                    <TableCell>{formatCurrency(transaction?.amount)}</TableCell>
+                                                    <TableCell>
+                                                        {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {transaction?.transaction_type}
+                                                        {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
+                                                    </TableCell>
+                                                    {/* <TableCell>
                                             <Badge
                                                 variant="light"
                                                 children={transaction?.status}
@@ -150,173 +134,177 @@ const PendingTransactions = () => {
                                                 }
                                             />
                                         </TableCell> */}
-                                            <TableCell>{transaction?.description}</TableCell>
-                                            <TableCell>{transaction?.initiator?.name}</TableCell>
-                                            <TableCell>{formatDate(transaction?.created_at, "llll")}</TableCell>
-                                            <TableCell>
-                                                <div className="relative inline-block">
-                                                    <button
-                                                        className="dropdown-toggle"
-                                                        onClick={() => {
-                                                            setInex(i + 1);
-                                                            toggleDropdown();
-                                                        }}
-                                                    >
-                                                        <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
-                                                    </button>
-                                                    <Dropdown
-                                                        isOpen={openDropDown && index === i + 1}
-                                                        onClose={closeDropdown}
-                                                        className="w-40 p-2"
-                                                    >
-                                                        <DropdownItem
-                                                            onItemClick={() => {
-                                                                setSelectedTransaction(transaction);
-                                                                openModal();
-                                                                closeDropdown();
-                                                            }}
-                                                            className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                        >
-                                                            View Details
-                                                        </DropdownItem>
-
-                                                        <AccessWrapper
-                                                            componentPermissions={[PERMISSION_VALUES.transaction.approve_transaction]}
-                                                        >
-                                                            <>
+                                                    <TableCell>{transaction?.description}</TableCell>
+                                                    <TableCell>{transaction?.initiator?.name}</TableCell>
+                                                    <TableCell>{formatDate(transaction?.created_at, "llll")}</TableCell>
+                                                    <TableCell>
+                                                        <div className="relative inline-block">
+                                                            <button
+                                                                className="dropdown-toggle"
+                                                                onClick={() => {
+                                                                    setInex(i + 1);
+                                                                    toggleDropdown();
+                                                                }}
+                                                            >
+                                                                <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
+                                                            </button>
+                                                            <Dropdown
+                                                                isOpen={openDropDown && index === i + 1}
+                                                                onClose={closeDropdown}
+                                                                className="w-40 p-2"
+                                                            >
                                                                 <DropdownItem
                                                                     onItemClick={() => {
-                                                                        setActionParams({ action: "approve", id: transaction?.id });
+                                                                        setSelectedTransaction(transaction);
+                                                                        openModal();
                                                                         closeDropdown();
                                                                     }}
-                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-success-400 hover:text-white dark:text-gray-400  dark:hover:text-gray-300"
+                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                                                                 >
-                                                                    Approve
+                                                                    View Details
                                                                 </DropdownItem>
 
-                                                                <DropdownItem
-                                                                    onItemClick={() => {
-                                                                        setActionParams({ action: "decline", id: transaction?.id });
-                                                                        closeDropdown();
-                                                                    }}
-                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg  hover:text-white hover:bg-red-500 dark:hover:text-white"
+                                                                <AccessWrapper
+                                                                    componentPermissions={[
+                                                                        PERMISSION_VALUES.transaction.approve_transaction
+                                                                    ]}
                                                                 >
-                                                                    Decline
-                                                                </DropdownItem>
-                                                            </>
-                                                        </AccessWrapper>
-                                                    </Dropdown>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                                                    <>
+                                                                        <DropdownItem
+                                                                            onItemClick={() => {
+                                                                                setActionParams({ action: "approve", id: transaction?.id });
+                                                                                closeDropdown();
+                                                                            }}
+                                                                            className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-success-400 hover:text-white dark:text-gray-400  dark:hover:text-gray-300"
+                                                                        >
+                                                                            Approve
+                                                                        </DropdownItem>
+
+                                                                        <DropdownItem
+                                                                            onItemClick={() => {
+                                                                                setActionParams({ action: "decline", id: transaction?.id });
+                                                                                closeDropdown();
+                                                                            }}
+                                                                            className="flex w-full font-normal text-left text-gray-500 rounded-lg  hover:text-white hover:bg-red-500 dark:hover:text-white"
+                                                                        >
+                                                                            Decline
+                                                                        </DropdownItem>
+                                                                    </>
+                                                                </AccessWrapper>
+                                                            </Dropdown>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-                {/* Mobile Cards */}
-                <div className="block lg:hidden px-2 py-4">
-                    {pageData.length === 0 ? (
-                        <div className="text-center text-gray-400 dark:text-gray-500 py-8">No pending transactions found.</div>
-                    ) : (
-                        pageData.map((transaction) => (
-                            <div
-                                key={transaction.id}
-                                className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-1/2">
-                                        {/* <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Amount</div> */}
-                                        <div className="text-sm font-bold text-gray-900 dark:text-success-600">
-                                            {formatCurrency(transaction?.amount)}
-                                        </div>
-                                    </div>
-                                    <Badge
-                                        variant="light"
-                                        children={transaction?.status}
-                                        color={
-                                            transaction?.status === "completed"
-                                                ? "success"
-                                                : transaction?.status === "pending"
-                                                ? "warning"
-                                                : "error"
-                                        }
-                                    />
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="secondary"
-                                            // size="icon"
-                                            className="p-1 h-7 w-7"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setSelectedTransaction(transaction);
-                                                openModal();
-                                            }}
-                                        >
-                                            <ListBulletIcon className="h-4 w-4" />
-                                        </Button>
-                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.transaction.approve_transaction]}>
-                                            <>
+                        {/* Mobile Cards */}
+                        <div className="block lg:hidden px-2 py-4">
+                            {pageData.length === 0 ? (
+                                <div className="text-center text-gray-400 dark:text-gray-500 py-8">No pending transactions found.</div>
+                            ) : (
+                                pageData.map((transaction) => (
+                                    <div
+                                        key={transaction.id}
+                                        className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="w-1/2">
+                                                {/* <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Amount</div> */}
+                                                <div className="text-sm font-bold text-gray-900 dark:text-success-600">
+                                                    {formatCurrency(transaction?.amount)}
+                                                </div>
+                                            </div>
+                                            <Badge
+                                                variant="light"
+                                                children={transaction?.status}
+                                                color={
+                                                    transaction?.status === "completed"
+                                                        ? "success"
+                                                        : transaction?.status === "pending"
+                                                        ? "warning"
+                                                        : "error"
+                                                }
+                                            />
+                                            <div className="flex gap-2">
                                                 <Button
-                                                    variant="success"
+                                                    variant="secondary"
                                                     // size="icon"
                                                     className="p-1 h-7 w-7"
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        setActionParams({ action: "approve", id: transaction?.id });
+                                                        setSelectedTransaction(transaction);
+                                                        openModal();
                                                     }}
                                                 >
-                                                    <CheckIcon className="h-4 w-4" />
+                                                    <ListBulletIcon className="h-4 w-4" />
                                                 </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    // size="icon"
-                                                    className="p-1 h-7 w-7"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setActionParams({ action: "decline", id: transaction?.id });
-                                                    }}
-                                                >
-                                                    <XMarkIcon className="h-4 w-4" />
-                                                </Button>
-                                            </>
-                                        </AccessWrapper>
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-full">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Charges</div>
-                                        <div className="text-sm text-red-700">
-                                            {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
+                                                <AccessWrapper componentPermissions={[PERMISSION_VALUES.transaction.approve_transaction]}>
+                                                    <>
+                                                        <Button
+                                                            variant="success"
+                                                            // size="icon"
+                                                            className="p-1 h-7 w-7"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setActionParams({ action: "approve", id: transaction?.id });
+                                                            }}
+                                                        >
+                                                            <CheckIcon className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="danger"
+                                                            // size="icon"
+                                                            className="p-1 h-7 w-7"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setActionParams({ action: "decline", id: transaction?.id });
+                                                            }}
+                                                        >
+                                                            <XMarkIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </>
+                                                </AccessWrapper>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-full">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Charges</div>
+                                                <div className="text-sm text-red-700">
+                                                    {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-1/2">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Type</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                    {transaction?.transaction_type}{" "}
+                                                    {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
+                                                </div>
+                                            </div>
+                                            <div className="w-1/2 mt-2">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">
+                                                    {formatDate(transaction?.created_at, "lll")}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-full">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
+                                                <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-1/2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Type</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {transaction?.transaction_type}{" "}
-                                            {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
-                                        </div>
-                                    </div>
-                                    <div className="w-1/2 mt-2">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">
-                                            {formatDate(transaction?.created_at, "lll")}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap gap-y-2 mb-2">
-                                    <div className="w-full">
-                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
-                                        <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
+                                ))
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
             <Modal
                 isOpen={isOpen}

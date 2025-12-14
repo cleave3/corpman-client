@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DocumentPlusIcon } from "@heroicons/react/24/outline";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { TableLoader, Table, TableHeader, TableRow, TableCell, TableBody, Pagination } from "../../components/ui/table";
-import { useTransactions } from "../../hooks/useApiHooks";
+import { useGetUsers, useTransactions } from "../../hooks/useApiHooks";
 import { formatCurrency, PERMISSION_VALUES, ROUTES } from "../../utils";
 import { formatDate } from "../../utils/date";
 import Badge from "../../components/ui/badge/Badge";
@@ -22,13 +22,15 @@ const Transactions = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [params] = useSearchParams();
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction>(null);
-    const [filterData, setFilterData] = useState({ page: 1, limit: 15, start_date: "", status: "", end_date: "" });
+    const [filterData, setFilterData] = useState({ page: 1, limit: 15, start_date: "", status: "", end_date: "", user_id: "" });
 
     const { closeModal, isOpen, openModal } = useModal();
 
     const { notDesktop } = useWidth();
 
     const { data, isLoading } = useTransactions(filterData);
+
+    const { data: userData } = useGetUsers();
 
     const pageData = data?.data?.transactions ?? [];
 
@@ -80,6 +82,20 @@ const Transactions = () => {
 
                 <Dropdown isOpen={showFilters} onClose={() => setShowFilters((prev) => !prev)} className="p-2">
                     <div className="flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
+                                Initiator
+                            </label>
+                            <SearchableSelect
+                                value={filterData.user_id}
+                                options={[{ value: "", label: "All" }].concat(
+                                    userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
+                                )}
+                                placeholder="Initiator"
+                                onChange={(value) => setFilterData((prev) => ({ ...prev, user_id: value }))}
+                                className="dark:bg-dark-900 w-40"
+                            />
+                        </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                             <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
                                 Transaction Status

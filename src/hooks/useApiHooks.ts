@@ -132,7 +132,7 @@ export const useCreateTransaction = () => useMutation({ mutationFn: ApiService.c
 
 export const useTransactions = (params: PaginatedQuery) => {
     return useQuery({
-        queryKey: ["transactions", params.page, params.status, params.start_date, params.end_date, params.limit],
+        queryKey: ["transactions", params.page, params.status, params.start_date, params.end_date, params.limit, params.user_id],
         queryFn: () => ApiService.listTransactions(params)
     });
 };
