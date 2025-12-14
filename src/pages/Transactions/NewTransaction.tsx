@@ -15,6 +15,7 @@ import ConfirmationModal from "../../components/confirm";
 const NewTransaction = () => {
     const [transaction, setTransaction] = useState<CreateTransactionRequest>({
         amount: 0,
+        charges: 0,
         transaction_type: "customer_deposit",
         description: "",
         meta_data: {}
@@ -50,14 +51,19 @@ const NewTransaction = () => {
             transaction.meta_data.customer = customer.name;
         }
 
+        const payload = transaction;
+
+        if (transaction.transaction_type !== "payout") payload.charges = null;
+
         closeModal();
 
-        mutate(transaction, {
+        mutate(payload, {
             onSuccess: async (data) => {
                 toast.success(data.message);
                 setTransaction({
                     amount: 0,
                     transaction_type: "",
+                    charges: 0,
                     description: "",
                     meta_data: {}
                 });
@@ -114,6 +120,18 @@ const NewTransaction = () => {
                                         }}
                                     />
                                 </div>
+
+                                {transaction?.transaction_type === "payout" && (
+                                    <div className="col-span-2 lg:col-span-1">
+                                        <Label>Charges</Label>
+                                        <CurrencyInput
+                                            required
+                                            min={1}
+                                            value={transaction.charges}
+                                            onChange={(e) => handleTransactionChange("charges", e)}
+                                        />
+                                    </div>
+                                )}
 
                                 {transaction?.transaction_type !== "income" && (
                                     <>

@@ -5,7 +5,7 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Badge from "../../components/ui/badge/Badge";
 import { Modal } from "../../components/ui/modal";
 import { TableLoader, Table, TableHeader, TableRow, TableCell, TableBody } from "../../components/ui/table";
-import { useApproveTransaction, useDeclineTransaction, usePendingTransactions } from "../../hooks/useApiHooks";
+import { useApproveTransaction, useDeclineTransaction, useGetUsers, usePendingTransactions } from "../../hooks/useApiHooks";
 import { useModal } from "../../hooks/useModal";
 import { formatCurrency, PERMISSION_VALUES } from "../../utils";
 import { formatDate } from "../../utils/date";
@@ -17,8 +17,11 @@ import { DropdownItem } from "../../components/ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
 import AccessWrapper from "../../components/AccessController";
 import useWidth from "../../hooks/useWidth";
+import SearchableSelect from "../../components/form/SearchableSelect";
 
 const PendingTransactions = () => {
+    const [showFilters, setShowFilters] = useState(false);
+    const [userId, setUserId] = useState("");
     const [openDropDown, setOpenDropDown] = useState(false);
     const [index, setInex] = useState(0);
 
@@ -35,7 +38,9 @@ const PendingTransactions = () => {
 
     const { closeModal, isOpen, openModal } = useModal();
 
-    const { data, isLoading } = usePendingTransactions();
+    const { data: userData } = useGetUsers();
+
+    const { data, isLoading } = usePendingTransactions(userId);
 
     const { mutate: aMutate } = useApproveTransaction();
     const { mutate: dMutate } = useDeclineTransaction();
@@ -59,7 +64,46 @@ const PendingTransactions = () => {
     if (isLoading) return <TableLoader />;
     return (
         <>
-            <PageBreadcrumb pageTitle={`Pending Transactions`} />
+            <div>
+                <PageBreadcrumb pageTitle={`Pending Transactions`} />
+                <div className="flex justify-end">
+                    <button
+                        type="button"
+                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                        onClick={() => setShowFilters((prev) => !prev)}
+                        aria-label="Show Filters"
+                    >
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="text-gray-700 dark:text-white">
+                            <path
+                                d="M3 5h18M6 12h12M10 19h4"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </button>
+
+                    <Dropdown isOpen={showFilters} onClose={() => setShowFilters((prev) => !prev)} className="p-2">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
+                                    Initiator
+                                </label>
+                                <SearchableSelect
+                                    value={userId}
+                                    options={[{ value: "", label: "All" }].concat(
+                                        userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` }))
+                                    )}
+                                    placeholder="Initiator"
+                                    onChange={(value) => setUserId(value)}
+                                    className="dark:bg-dark-900 w-40"
+                                />
+                            </div>
+                        </div>
+                    </Dropdown>
+                </div>
+            </div>
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                 {/* Desktop/Tablets Table */}
                 <div className="hidden lg:block max-w-full overflow-x-auto min-h-screen">
@@ -73,6 +117,7 @@ const PendingTransactions = () => {
                                     <TableRow>
                                         <TableCell isHeader>ID</TableCell>
                                         <TableCell isHeader>Amount</TableCell>
+                                        <TableCell isHeader>Charges</TableCell>
                                         <TableCell isHeader>Type</TableCell>
                                         {/* <TableCell isHeader>Status</TableCell> */}
                                         <TableCell isHeader>Description</TableCell>
@@ -87,6 +132,7 @@ const PendingTransactions = () => {
                                         <TableRow key={transaction.id} className="cursor-pointer">
                                             <TableCell>{transaction?.id}</TableCell>
                                             <TableCell>{formatCurrency(transaction?.amount)}</TableCell>
+                                            <TableCell>{transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}</TableCell>
                                             <TableCell>
                                                 {transaction?.transaction_type}
                                                 {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
@@ -236,6 +282,14 @@ const PendingTransactions = () => {
                                                 </Button>
                                             </>
                                         </AccessWrapper>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-y-2 mb-2">
+                                    <div className="w-full">
+                                        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Charges</div>
+                                        <div className="text-sm text-red-700">
+                                            {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-y-2 mb-2">

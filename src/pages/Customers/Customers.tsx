@@ -4,7 +4,14 @@ import { useCustomers } from "../../hooks/useApiHooks";
 import { formatCurrency, PERMISSION_VALUES } from "../../utils";
 import { formatDate } from "../../utils/date";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import { MagnifyingGlassIcon, ArrowPathIcon, PencilIcon, ListBulletIcon, ArrowDownTrayIcon, UserPlusIcon } from "@heroicons/react/24/outline";
+import {
+    MagnifyingGlassIcon,
+    ArrowPathIcon,
+    PencilIcon,
+    ListBulletIcon,
+    ArrowDownTrayIcon,
+    UserPlusIcon
+} from "@heroicons/react/24/outline";
 import Button from "../../components/button/Button";
 import NewCustomer from "./NewCustomer";
 import { useModal } from "../../hooks/useModal";
@@ -42,7 +49,15 @@ const Customers = () => {
 
     const { notDesktop } = useWidth();
 
-    const [filterData, setFilterData] = useState({ page: 1, limit: 10, search: "", start_date: "", customer_type: "", end_date: "" });
+    const [filterData, setFilterData] = useState({
+        page: 1,
+        limit: 10,
+        search: "",
+        start_date: "",
+        customer_type: "",
+        end_date: "",
+        status: ""
+    });
 
     const { data, isLoading } = useCustomers(filterData);
 
@@ -124,6 +139,20 @@ const Customers = () => {
                                 />
                             </div>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2">Customer Status</label>
+                                <SearchableSelect
+                                    value={filterData?.status}
+                                    options={[
+                                        { value: "", label: "All" },
+                                        { value: "active", label: "Active" },
+                                        { value: "inactive", label: "Inactive" }
+                                    ]}
+                                    placeholder="Customer Status"
+                                    onChange={(value) => setFilterData((prev) => ({ ...prev, status: value }))}
+                                    className="dark:bg-dark-900 w-40"
+                                />
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                 <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="start-date">
                                     Start Date
                                 </label>
@@ -180,6 +209,7 @@ const Customers = () => {
                                         start_date: "",
                                         end_date: "",
                                         customer_type: "",
+                                        status: "",
                                         page: 1
                                     }));
                                 }}
@@ -221,6 +251,9 @@ const Customers = () => {
                                         </AccessWrapper>
                                         <TableCell isHeader className="">
                                             Customer Type
+                                        </TableCell>
+                                        <TableCell isHeader className="">
+                                            Status
                                         </TableCell>
                                         <TableCell isHeader className="">
                                             Email
@@ -285,6 +318,17 @@ const Customers = () => {
                                                     }`}
                                                 >
                                                     {customer.customer_type === "premium" ? "Premium" : "Regular"}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="">
+                                                <span
+                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold  ${
+                                                        customer.status === "active"
+                                                            ? "bg-green-500 text-gray-200"
+                                                            : "bg-gray-100 text-black"
+                                                    }`}
+                                                >
+                                                    {customer.status === "active" ? "Active" : "Inactive"}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="">{customer?.email ?? "-"}</TableCell>
@@ -400,6 +444,16 @@ const Customers = () => {
                                                         }`}
                                                     >
                                                         {customer.customer_type === "premium" ? "Premium" : "Regular"}
+                                                    </span>
+
+                                                    <span
+                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mx-2  ${
+                                                            customer.status === "active"
+                                                                ? "bg-green-500 text-gray-200"
+                                                                : "bg-gray-100 text-black"
+                                                        }`}
+                                                    >
+                                                        {customer.status === "active" ? "Active" : "Inactive"}
                                                     </span>
                                                 </div>
                                             </div>

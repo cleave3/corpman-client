@@ -99,7 +99,7 @@ export interface CreateCustomerRequest {
     payment_frequency: string;
     next_payment_date: string;
     opening_balance: number;
-    sms_alert: string
+    sms_alert: string;
 }
 
 export type UpdateCustomerRequest = Partial<Omit<CreateCustomerRequest, "opening_balance">>;
@@ -108,6 +108,7 @@ export interface CreateTransactionRequest {
     amount: number;
     transaction_type: string;
     description: string;
+    charges?: number;
     meta_data?: {
         [x: string]: string;
     };
@@ -210,6 +211,7 @@ export type Customer = {
     payment_frequency: string;
     customer_type: string;
     customer_code: string;
+    status: "active" | "inactive";
     created_at: string;
     creator_id: string;
     sms_alert: "YES" | "NO";
@@ -222,6 +224,7 @@ export type Customer = {
 export type Transaction = {
     business_id: string;
     amount: number;
+    charges?: number;
     status: "cancelled" | "completed" | "pending";
     meta_data: {
         [x: string]: string;

@@ -104,7 +104,7 @@ export const useCreateCustomer = () => useMutation({ mutationFn: ApiService.crea
 
 export const useCustomers = (params: PaginatedQuery) => {
     return useQuery({
-        queryKey: ["customers", params.page, params.search, params.start_date, params.end_date, params.customer_type],
+        queryKey: ["customers", params.page, params.search, params.start_date, params.end_date, params.customer_type, params.status],
         queryFn: () => ApiService.listCustomers(params)
     });
 };
@@ -144,10 +144,10 @@ export const useMyEntries = (month: number, year: number) => {
     });
 };
 
-export const usePendingTransactions = () => {
+export const usePendingTransactions = (user_id?: string) => {
     return useQuery({
-        queryKey: ["pendingTransactions"],
-        queryFn: () => ApiService.listTransactions({ status: "pending" })
+        queryKey: ["pendingTransactions", user_id],
+        queryFn: () => ApiService.listTransactions({ status: "pending", user_id })
     });
 };
 

@@ -154,6 +154,9 @@ const Transactions = () => {
                                                 Amount
                                             </TableCell>
                                             <TableCell isHeader className="">
+                                                Charges
+                                            </TableCell>
+                                            <TableCell isHeader className="">
                                                 Type
                                             </TableCell>
                                             <TableCell isHeader className="">
@@ -183,6 +186,7 @@ const Transactions = () => {
                                             >
                                                 <TableCell className="">{transaction?.id}</TableCell>
                                                 <TableCell className="">{formatCurrency(transaction?.amount)}</TableCell>
+                                                <TableCell>{transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}</TableCell>
                                                 <TableCell>
                                                     {transaction?.transaction_type}
                                                     {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
@@ -250,6 +254,14 @@ const Transactions = () => {
                                                         : "error"
                                                 }
                                             />
+                                        </div>
+                                        <div className="flex flex-wrap gap-y-2 mb-2">
+                                            <div className="w-full">
+                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Charges</div>
+                                                <div className="text-sm text-red-700">
+                                                    {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex flex-wrap gap-y-2 mb-2">
                                             <div className="w-1/2">
