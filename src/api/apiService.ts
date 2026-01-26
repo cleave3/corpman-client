@@ -43,7 +43,7 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && Cookies.get("refresh_token")) {
             originalRequest._retry = true;
             try {
                 const { data } = await axios.get(`${BASE_URL}/api/v1/auth/refresh-token`, {

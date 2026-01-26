@@ -3,7 +3,7 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import UserInfoCard from "./UserInfoCard";
 import UserMetaCard from "./UserMetaCard";
-import UserPermissionsCard from "./UserPermissionsCard";
+// import UserPermissionsCard from "./UserPermissionsCard";
 
 export default function UserProfiles() {
     const refreshAuth = useAuthStore((state) => state.refreshAuth);
@@ -19,7 +19,7 @@ export default function UserProfiles() {
                 <div className="space-y-6">
                     <UserMetaCard />
                     <UserInfoCard />
-                    <UserPermissionsCard />
+                    {/* <UserPermissionsCard /> */}
                 </div>
             </div>
         </>
