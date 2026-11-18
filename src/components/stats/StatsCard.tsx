@@ -10,7 +10,13 @@ interface StatsCardprops {
     onClick?: StaticFunc;
 }
 
-const StatsCard = ({ title, isLoading = false, value, icon = <GroupIcon className="size-6 text-blue-500" />, onClick }: StatsCardprops) => {
+const StatsCard = ({
+    title,
+    isLoading = false,
+    value,
+    icon = <GroupIcon className="size-5 text-brand-600 dark:text-brand-400" />,
+    onClick
+}: StatsCardprops) => {
     const isClickable = !!onClick;
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -20,47 +26,39 @@ const StatsCard = ({ title, isLoading = false, value, icon = <GroupIcon classNam
         }
     };
 
-    const commonProps = {
-        onClick: isClickable ? onClick : undefined,
-        onKeyDown: isClickable ? handleKeyDown : undefined,
-        role: isClickable ? "button" : undefined,
-        tabIndex: isClickable ? 0 : undefined,
-        "aria-busy": isLoading,
-        "aria-label": title
-    };
-
     return (
-        <>
-            <div
-                {...commonProps}
-                className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-white/[0.03] md:p-5 cursor-pointer lg:block hidden"
-            >
-                <div className="relative z-10 flex flex-col items-start">
-                    <div className="flex items-center justify-center size-10 mb-2 rounded-xl bg-blue-100 dark:bg-blue-900/50">{icon}</div>
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</span>
-                    <h4 className="mt-1 font-bold text-gray-800 text-title-sm dark:text-white/90">
-                        {isLoading ? <div className="h-6 w-16 bg-gray-200 rounded animate-pulse dark:bg-gray-700" /> : value}
-                    </h4>
+        <div
+            onClick={isClickable ? onClick : undefined}
+            onKeyDown={isClickable ? handleKeyDown : undefined}
+            role={isClickable ? "button" : undefined}
+            tabIndex={isClickable ? 0 : undefined}
+            aria-busy={isLoading}
+            aria-label={title}
+            className={`relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all dark:border-gray-800 dark:bg-gray-900/60 ${
+                isClickable
+                    ? "cursor-pointer hover:border-brand-500/40 hover:shadow-sm active:scale-[0.98]"
+                    : "cursor-default"
+            }`}
+        >
+            <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    {title}
+                </span>
+                <div className="flex size-9 sm:size-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/15">
+                    {icon}
                 </div>
             </div>
-            <div
-                {...commonProps}
-                className={`
-                p-5 rounded-xl border bg-white dark:bg-gray-900 dark:border-gray-700 lg:hidden
-                flex items-center justify-between
-                transition-all duration-300
-                ${isClickable ? "cursor-pointer hover:shadow-lg hover:border-blue-500/50 dark:hover:border-blue-500/50" : "cursor-default"}
-            `}
-            >
-                <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-                    <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                        {isLoading ? <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse dark:bg-gray-700" /> : value}
+
+            <div className="mt-1">
+                {isLoading ? (
+                    <div className="h-7 w-20 bg-gray-200 dark:bg-gray-800 rounded-md animate-pulse" />
+                ) : (
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white tabular-nums">
+                        {value}
                     </h3>
-                </div>
-                <div className="flex items-center justify-center size-12 rounded-full bg-blue-100 dark:bg-blue-900/50">{icon}</div>
+                )}
             </div>
-        </>
+        </div>
     );
 };
 

@@ -5,15 +5,18 @@ import MetricsLoader from "./MetricsLoader";
 import { useState } from "react";
 import { formatCurrency } from "../../utils";
 import useWidth from "../../hooks/useWidth";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
 
 const Metrics = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
 
     const { isMobile } = useWidth();
-
     const { data, isLoading } = useTransactionsByInitiator(year, month);
 
     const initiators = data?.data?.collectors_stats;
@@ -21,107 +24,79 @@ const Metrics = () => {
     const total_income = data?.data?.total_income;
     const total_payouts = data?.data?.total_payouts;
 
+    const isCurrentYear = year === new Date().getFullYear();
+    const maxMonth = isCurrentYear ? new Date().getMonth() + 1 : 12;
+
     return (
-        <>
-            <h2
-                className="text-2xl font-semibold text-center my-4
-                    text-gray-900 dark:text-white"
-            >
-                Performance metrics for {months[month - 1]} {year}
-            </h2>
-            <div className="flex items-center justify-start gap-2">
-                <select
-                    className="h-11 w-50 appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ml-4"
-                    value={month}
-                    onChange={(e) => setMonth(Number(e.target.value))}
-                >
-                    {months.map((monthName, idx) => {
-                        // Only show months up to the current month if the selected year is the current year
-                        const isCurrentYear = year === new Date().getFullYear();
-                        const maxMonth = isCurrentYear ? new Date().getMonth() + 1 : 12;
-                        if (idx + 1 > maxMonth) return null;
-                        return (
-                            <option key={idx + 1} value={idx + 1}>
-                                {monthName}
+        <div className="space-y-4">
+            <PageBreadcrumb pageTitle="Performance Metrics" />
+
+            {/* Filter Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                <div>
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                        Financial Performance: {months[month - 1]} {year}
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Overview of deposit volumes, company revenue, and team collections
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:flex items-center gap-2">
+                    <select
+                        className="h-11 appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                        value={month}
+                        onChange={(e) => setMonth(Number(e.target.value))}
+                    >
+                        {months.map((monthName, idx) => {
+                            if (idx + 1 > maxMonth) return null;
+                            return (
+                                <option key={idx + 1} value={idx + 1}>
+                                    {monthName}
+                                </option>
+                            );
+                        })}
+                    </select>
+
+                    <select
+                        className="h-11 appearance-none rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/15 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                        value={year}
+                        onChange={(e) => setYear(Number(e.target.value))}
+                    >
+                        {Array.from({ length: new Date().getFullYear() - 2023 }, (_, i) => (
+                            <option key={i} value={new Date().getFullYear() - i}>
+                                {new Date().getFullYear() - i}
                             </option>
-                        );
-                    })}
-                </select>
-                <select
-                    className="h-11 w-50 appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                    value={year}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                >
-                    {Array.from({ length: new Date().getFullYear() - 2024 }, (_, i) => (
-                        <option key={i} value={new Date().getFullYear() - i}>
-                            {new Date().getFullYear() - i}
-                        </option>
-                    ))}
-                </select>
+                        ))}
+                    </select>
+                </div>
             </div>
+
             {isLoading ? (
                 <MetricsLoader />
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="flex flex-col my-6">
-                        {total_customer_deposits || total_income || total_payouts ? (
-                            <Chart
-                                type="pie"
-                                height={400}
-                                series={[total_customer_deposits || 0, total_income || 0, total_payouts || 0]}
-                                options={{
-                                    labels: ["Total Customer Deposits", "Total Income", "Total Payouts"],
-                                    legend: {
-                                        position: isMobile ? "top" : "left",
-
-                                        formatter: (seriesName: string, opts) => {
-                                            const value = opts.w.globals.series[opts.seriesIndex];
-                                            return `${seriesName}: ${formatCurrency(value)}`;
-                                        }
-                                    },
-                                    title: { text: "Financial Flow Breakdown", align: "center" },
-                                    tooltip: {
-                                        y: {
-                                            formatter: (val: number) => formatCurrency(val)
-                                        }
-                                    }
-                                }}
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-96 text-gray-400">
-                                <span className="text-lg">No financial data available for this period.</span>
-                            </div>
-                        )}
-                        <div className="mt-6">
-                            {initiators && initiators.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Charts Column */}
+                    <div className="space-y-4">
+                        {/* Flow Breakdown Card */}
+                        <div className="p-4 sm:p-5 rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+                                Financial Flow Breakdown
+                            </h3>
+                            {total_customer_deposits || total_income || total_payouts ? (
                                 <Chart
-                                    type="bar"
-                                    height={400}
-                                    series={[
-                                        {
-                                            name: "Collection Volume",
-                                            data: initiators?.map((i) => i.collection_volume) || []
-                                        }
-                                    ]}
+                                    type="pie"
+                                    height={isMobile ? 320 : 360}
+                                    series={[total_customer_deposits || 0, total_income || 0, total_payouts || 0]}
                                     options={{
-                                        chart: { id: "initiator-collection-volume" },
-                                        xaxis: {
-                                            categories: initiators?.map((i) => i.name) || [],
-                                            title: { text: "Collectors name" }
-                                        },
-                                        yaxis: {
-                                            title: { text: "Amount Collected" },
-                                            labels: {
-                                                formatter: (val: number) => formatCurrency(val)
-                                            }
-                                        },
-                                        title: {
-                                            text: "Collections Stats",
-                                            align: "center"
-                                        },
+                                        labels: ["Customer Deposits", "Company Income", "Payouts Issued"],
+                                        colors: ["#3B82F6", "#10B981", "#EF4444"],
                                         legend: {
-                                            show: true,
-                                            formatter: (seriesName: string) => `Collection Volume (${seriesName})`
+                                            position: isMobile ? "bottom" : "bottom",
+                                            formatter: (seriesName: string, opts) => {
+                                                const value = opts.w.globals.series[opts.seriesIndex];
+                                                return `${seriesName}: ${formatCurrency(value)}`;
+                                            }
                                         },
                                         tooltip: {
                                             y: {
@@ -131,18 +106,63 @@ const Metrics = () => {
                                     }}
                                 />
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-96 text-gray-400">
-                                    <span className="text-lg">No collection stats available for this period.</span>
+                                <div className="flex flex-col items-center justify-center h-64 text-gray-400 text-xs">
+                                    No financial transaction data recorded for this month.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Collections Stats Bar Chart */}
+                        <div className="p-4 sm:p-5 rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+                                Collection Volume by Staff
+                            </h3>
+                            {initiators && initiators.length > 0 ? (
+                                <Chart
+                                    type="bar"
+                                    height={isMobile ? 300 : 360}
+                                    series={[
+                                        {
+                                            name: "Volume",
+                                            data: initiators.map((i) => i.collection_volume)
+                                        }
+                                    ]}
+                                    options={{
+                                        chart: { id: "initiator-collection-volume", toolbar: { show: false } },
+                                        colors: ["#3B82F6"],
+                                        xaxis: {
+                                            categories: initiators.map((i) => i.name),
+                                            labels: {
+                                                style: { fontSize: "11px" }
+                                            }
+                                        },
+                                        yaxis: {
+                                            labels: {
+                                                formatter: (val: number) => formatCurrency(val)
+                                            }
+                                        },
+                                        tooltip: {
+                                            y: {
+                                                formatter: (val: number) => formatCurrency(val)
+                                            }
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-64 text-gray-400 text-xs">
+                                    No staff collection activity found for this month.
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="order-first lg:order-none lg:p-6 my-6">
+
+                    {/* Rankings Column */}
+                    <div>
                         <InitiatorStats initiators={initiators} />
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

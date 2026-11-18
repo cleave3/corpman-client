@@ -1,4 +1,4 @@
-import { PencilIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Business, SubmitBusinessRequest } from "../../api/types";
 import AccessWrapper from "../../components/AccessController";
 import Input from "../../components/form/input/InputField";
@@ -11,6 +11,7 @@ import { useModal } from "../../hooks/useModal";
 import { PERMISSION_VALUES } from "../../utils";
 import { formatDate } from "../../utils/date";
 import { useEffect, useState } from "react";
+import useWidth from "../../hooks/useWidth";
 
 const BusinessInfo = ({ data }: { data: Business }) => {
     const [form, setForm] = useState<SubmitBusinessRequest>({
@@ -27,7 +28,7 @@ const BusinessInfo = ({ data }: { data: Business }) => {
     });
 
     const { openModal, closeModal, isOpen } = useModal();
-
+    const { notDesktop } = useWidth();
     const { mutate, isPending, isSuccess } = useSubmitBusiness();
 
     useEffect(() => {
@@ -58,180 +59,229 @@ const BusinessInfo = ({ data }: { data: Business }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         mutate(form);
     };
 
     return (
         <>
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                    <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-                        <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+            <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                {/* Header Profile */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center gap-4">
+                        <div className="size-16 sm:size-20 overflow-hidden border border-gray-200 rounded-2xl dark:border-gray-800 flex items-center justify-center bg-gray-50 dark:bg-gray-800 flex-shrink-0">
                             {data?.logo_url ? (
-                                <img src={data?.logo_url} alt="user" className="w-full h-full object-cover" />
+                                <img src={data?.logo_url} alt="Business logo" className="size-full object-cover" />
                             ) : (
-                                <span className="text-2xl font-semibold text-gray-600 dark:text-gray-300">
+                                <span className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-400">
                                     {`${data?.business_name?.[0] ?? ""} ${data?.business_name?.[1] ?? ""}`.toUpperCase()}
                                 </span>
                             )}
                         </div>
-                        <div className="order-3 xl:order-2">
-                            <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-                                {data?.business_name}
-                            </h4>
-                            <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    <Badge
-                                        variant="light"
-                                        color={data?.business_kyc_status === "approved" ? "success" : "warning"}
-                                        children={data?.business_kyc_status}
-                                    />
-                                </p>
+                        <div>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                                {data?.business_name || "Enterprise"}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                    variant="light"
+                                    color={data?.business_kyc_status === "approved" ? "success" : "warning"}
+                                >
+                                    KYC: {data?.business_kyc_status || "Pending"}
+                                </Badge>
+                                <span className="text-xs text-gray-400">
+                                    {data?.business_type}
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     <AccessWrapper componentPermissions={[PERMISSION_VALUES.business.update_business]}>
                         <button
+                            type="button"
                             onClick={openModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition self-start sm:self-auto"
                         >
-                            <PencilIcon className="size-4" />
-                            Edit
+                            <PencilSquareIcon className="size-4" />
+                            <span>Edit Profile</span>
                         </button>
                     </AccessWrapper>
                 </div>
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between my-10">
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 text-xs">
                     <div>
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">REG. Number</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_reg_no}</p>
-                            </div>
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Nature of Business</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_nature}</p>
-                            </div>
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Business Type</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_type}</p>
-                            </div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            RC / Reg Number
+                        </p>
+                        <p className="text-sm font-bold text-gray-800 dark:text-white">
+                            {data?.business_reg_no || "—"}
+                        </p>
+                    </div>
 
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Address</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_address}</p>
-                            </div>
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Nature of Business
+                        </p>
+                        <p className="text-sm font-medium text-gray-800 dark:text-white">
+                            {data?.business_nature || "—"}
+                        </p>
+                    </div>
 
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Email address</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_email}</p>
-                            </div>
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Official Email
+                        </p>
+                        <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                            {data?.business_email || "—"}
+                        </p>
+                    </div>
 
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.business_phone}</p>
-                            </div>
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Telephone
+                        </p>
+                        <p className="text-sm font-medium text-gray-800 dark:text-white">
+                            {data?.business_phone || "—"}
+                        </p>
+                    </div>
 
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Updated At</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {formatDate(data?.updated_at, "llll")}
-                                </p>
-                            </div>
-                        </div>
+                    <div className="sm:col-span-2">
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Registered Office Address
+                        </p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300">
+                            {data?.business_address || "—"}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Profile Updated
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                            {formatDate(data?.updated_at, "lll")}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-                <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-                    <div className="px-2 pr-14">
-                        <h4 className="mb-2 text-xl font-semibold text-gray-800 dark:text-white/90">Edit Business Information</h4>
+            <Modal
+                isOpen={isOpen}
+                onClose={closeModal}
+                isFullscreen={notDesktop}
+                className="max-w-[650px] m-0 sm:m-2"
+            >
+                <div className="flex flex-col min-h-full">
+                    <div className="pb-4 border-b border-gray-100 dark:border-gray-800">
+                        <h4 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                            Edit Business Information
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Keep enterprise organizational records accurate
+                        </p>
                     </div>
-                    <form className="flex flex-col" onSubmit={handleSubmit}>
-                        <div className="custom-scrollbar h-auto overflow-y-auto px-2 pb-3">
-                            <div className="mt-7">
-                                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Business Name</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_name || ""}
-                                            onChange={(e) => updateForm("business_name", e.target.value)}
-                                        />
-                                    </div>
 
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Registration Number</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_reg_no || ""}
-                                            onChange={(e) => updateForm("business_reg_no", e.target.value)}
-                                        />
-                                    </div>
+                    <form className="flex flex-col flex-1 mt-4" onSubmit={handleSubmit}>
+                        <div className="space-y-4 flex-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Business Name
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.business_name || ""}
+                                        onChange={(e) => updateForm("business_name", e.target.value)}
+                                        placeholder="e.g. Acme Corp"
+                                    />
+                                </div>
 
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Email Address</Label>
-                                        <Input
-                                            type="email"
-                                            value={form.business_email || ""}
-                                            onChange={(e) => updateForm("business_email", e.target.value)}
-                                        />
-                                    </div>
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Registration / RC Number
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.business_reg_no || ""}
+                                        onChange={(e) => updateForm("business_reg_no", e.target.value)}
+                                        placeholder="RC-123456"
+                                    />
+                                </div>
 
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Phone</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_phone || ""}
-                                            onChange={(e) => updateForm("business_phone", e.target.value)}
-                                        />
-                                    </div>
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Official Email Address
+                                    </Label>
+                                    <Input
+                                        type="email"
+                                        value={form.business_email || ""}
+                                        onChange={(e) => updateForm("business_email", e.target.value)}
+                                        placeholder="contact@company.com"
+                                    />
+                                </div>
 
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Nature of Business</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_nature || ""}
-                                            onChange={(e) => updateForm("business_nature", e.target.value)}
-                                        />
-                                    </div>
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Phone Number
+                                    </Label>
+                                    <Input
+                                        type="tel"
+                                        value={form.business_phone || ""}
+                                        onChange={(e) => updateForm("business_phone", e.target.value)}
+                                        placeholder="08012345678"
+                                    />
+                                </div>
 
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Business Type</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_type || ""}
-                                            onChange={(e) => updateForm("business_type", e.target.value)}
-                                        />
-                                    </div>
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Nature of Business
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.business_nature || ""}
+                                        onChange={(e) => updateForm("business_nature", e.target.value)}
+                                        placeholder="e.g. Microfinance / Retail"
+                                    />
+                                </div>
 
-                                    <div className="col-span-2">
-                                        <Label>Business Address</Label>
-                                        <Input
-                                            value={form.business_address || ""}
-                                            onChange={(e) => updateForm("business_address", e.target.value)}
-                                        />
-                                    </div>
+                                <div className="col-span-1">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Business Type
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.business_type || ""}
+                                        onChange={(e) => updateForm("business_type", e.target.value)}
+                                        placeholder="e.g. Limited Liability"
+                                    />
+                                </div>
 
-                                    {/* <div className="col-span-2">
-                                        <Label>Business Website</Label>
-                                        <Input
-                                            type="text"
-                                            value={form.business_website || ""}
-                                            onChange={(e) => updateForm("business_website", e.target.value)}
-                                        />
-                                    </div> */}
+                                <div className="col-span-1 sm:col-span-2">
+                                    <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Physical Business Address
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        value={form.business_address || ""}
+                                        onChange={(e) => updateForm("business_address", e.target.value)}
+                                        placeholder="Street Address, City, State"
+                                    />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 px-2 mt-6 justify-end">
-                            <Button size="sm" disabled={isPending} variant="outline" onClick={closeModal}>
-                                Close
+
+                        <div className="sticky bottom-0 pt-4 mt-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+                            <Button
+                                size="sm"
+                                disabled={isPending}
+                                variant="outline"
+                                onClick={closeModal}
+                                type="button"
+                            >
+                                Cancel
                             </Button>
-                            <Button size="sm" disabled={isPending}>
-                                {isPending ? "Saving Changes" : "Save Changes"}
+                            <Button size="sm" disabled={isPending} type="submit">
+                                {isPending ? "Saving..." : "Save Changes"}
                             </Button>
                         </div>
                     </form>

@@ -6,56 +6,70 @@ export default function UserInfoCard() {
 
     if (!user) {
         return (
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 animate-pulse">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                        <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i}>
-                                    <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                                    <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                                </div>
-                            ))}
+            <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs animate-pulse">
+                <div className="h-5 w-40 bg-gray-200 dark:bg-gray-800 rounded mb-4" />
+                <div className="grid grid-cols-2 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="space-y-1.5">
+                            <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded" />
+                            <div className="h-4 w-28 bg-gray-100 dark:bg-gray-800/60 rounded" />
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+            <h4 className="text-base font-bold text-gray-900 dark:text-white mb-4">
+                Personal Information
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div>
-                    <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">Personal Information</h4>
+                    <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                        First Name
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {user?.first_name || "—"}
+                    </p>
+                </div>
 
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-                        <div>
-                            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">First Name</p>
-                            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{user?.first_name}</p>
-                        </div>
+                <div>
+                    <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                        Last Name
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {user?.last_name || "—"}
+                    </p>
+                </div>
 
-                        <div>
-                            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Last Name</p>
-                            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{user?.last_name}</p>
-                        </div>
+                <div>
+                    <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                        Email Address
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">
+                        {user?.email || "—"}
+                    </p>
+                </div>
 
-                        <div>
-                            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Email address</p>
-                            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{user?.email}</p>
-                        </div>
+                <div>
+                    <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                        Telephone
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {user?.phone || "—"}
+                    </p>
+                </div>
 
-                        <div>
-                            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
-                            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{user?.phone}</p>
-                        </div>
-
-                        <div>
-                            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Last Login</p>
-                            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{formatDate(user?.last_login, "llll")}</p>
-                        </div>
-                    </div>
+                <div className="sm:col-span-2">
+                    <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                        Last Login Session
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                        {formatDate(user?.last_login, "llll")}
+                    </p>
                 </div>
             </div>
         </div>

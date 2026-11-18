@@ -75,33 +75,34 @@ const TableCell: React.FC<TableCellProps> = ({ children, isHeader = false, class
 
 const TableLoader: React.FC<{ length?: number }> = ({ length = 6 }) => {
     return (
-        <div className="p-4 sm:p-8">
-            <div className="animate-pulse space-y-4 sm:space-y-0">
-                {/* Mobile View */}
-                <div className="block sm:hidden space-y-4">
+        <div className="p-3 sm:p-6">
+            <div className="animate-pulse space-y-3 sm:space-y-0">
+                {/* Mobile Skeleton Cards */}
+                <div className="block lg:hidden space-y-3">
                     {Array.from({ length: 5 }).map((_, idx) => (
                         <div
                             key={idx}
-                            className="rounded-lg border border-gray-100 dark:border-white/[0.05] p-4 bg-white dark:bg-white/[0.03] shadow-sm"
+                            className="rounded-2xl border border-gray-200/80 dark:border-gray-800 p-4 bg-white dark:bg-gray-900 shadow-xs"
                         >
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-200" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="h-4 bg-gray-200 rounded w-2/3" />
-                                    <div className="h-3 bg-gray-200 rounded w-1/3" />
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded-md w-1/3" />
+                                    <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded-md w-1/4" />
                                 </div>
+                                <div className="h-6 w-16 bg-gray-200 dark:bg-gray-800 rounded-full" />
                             </div>
-                            <div className="space-y-2 text-sm">
-                                <div className="h-3 bg-gray-200 rounded w-5/6" />
-                                <div className="h-3 bg-gray-200 rounded w-4/6" />
-                                <div className="h-3 bg-gray-200 rounded w-3/6" />
+                            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 dark:border-gray-800/60">
+                                <div className="h-3.5 bg-gray-200 dark:bg-gray-800 rounded w-4/5" />
+                                <div className="h-3.5 bg-gray-200 dark:bg-gray-800 rounded w-3/5 ml-auto" />
+                                <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded w-full" />
+                                <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded w-2/3 ml-auto" />
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Desktop View */}
-                <div className="hidden sm:block overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                {/* Desktop View Skeleton */}
+                <div className="hidden lg:block overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="overflow-x-auto">
                         <div className="min-w-[1102px]">
                             <table className="w-full">
@@ -109,7 +110,7 @@ const TableLoader: React.FC<{ length?: number }> = ({ length = 6 }) => {
                                     <tr>
                                         {Array.from({ length }).map((_, idx) => (
                                             <th key={idx} className="px-5 py-3">
-                                                <div className="h-4 bg-gray-200 rounded w-24" />
+                                                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-24" />
                                             </th>
                                         ))}
                                     </tr>
@@ -119,7 +120,7 @@ const TableLoader: React.FC<{ length?: number }> = ({ length = 6 }) => {
                                         <tr key={rowIdx} className="border-b border-gray-100 dark:border-white/[0.05]">
                                             {Array.from({ length }).map((_, colIdx) => (
                                                 <td key={colIdx} className="px-5 py-4">
-                                                    <div className="h-4 bg-gray-200 rounded w-full" />
+                                                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full" />
                                                 </td>
                                             ))}
                                         </tr>
@@ -142,25 +143,28 @@ const Pagination: React.FC<{ page: number; limit: number; total: number; loaded:
     total,
     loaded
 }) => {
+    const totalPages = Math.max(1, Math.ceil(total / limit));
     return (
-        <div className="flex items-center justify-end gap-4 px-6 py-4">
-            <div className="text-gray-500 text-theme-xs dark:text-gray-200">
-                {total === 0 ? "No records" : `Showing ${loaded} of ${total}`}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 border-t border-gray-100 dark:border-white/[0.05]">
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+                {total === 0 ? "No records" : `Showing ${loaded} of ${total} records`}
             </div>
             <div className="flex items-center gap-2">
                 <button
-                    className="px-3 py-1 rounded border border-gray-200 bg-white text-gray-600 text-theme-xs hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 transition shadow-xs"
                     disabled={page === 1}
                     onClick={prevFunc}
                 >
                     Previous
                 </button>
-                <span className="text-gray-500 text-theme-xs dark:text-gray-200">
-                    Page {total === 0 ? 0 : page} of {Math.max(1, Math.ceil(total / limit))}
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 px-1">
+                    {total === 0 ? "0 / 0" : `${page} / ${totalPages}`}
                 </span>
                 <button
-                    className="px-3 py-1 rounded border border-gray-200 bg-white text-gray-600 text-theme-xs hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
-                    disabled={page >= Math.ceil(total / limit) || total === 0}
+                    type="button"
+                    className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 transition shadow-xs"
+                    disabled={page >= totalPages || total === 0}
                     onClick={nextFunc}
                 >
                     Next

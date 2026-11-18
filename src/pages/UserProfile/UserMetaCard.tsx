@@ -1,6 +1,6 @@
 import { useAuthStore } from "../../hooks/useAuthStore";
 import Badge from "../../components/ui/badge/Badge";
-import { ArrowLeftEndOnRectangleIcon, EyeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { ArrowRightOnRectangleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { useModal } from "../../hooks/useModal";
 import { useState } from "react";
 import Input from "../../components/form/input/InputField";
@@ -8,15 +8,23 @@ import Label from "../../components/form/Label";
 import { Modal } from "../../components/ui/modal";
 import { useChangePassword } from "../../hooks/useApiHooks";
 import { toast } from "react-toastify";
-import { EyeCloseIcon } from "../../icons";
+import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Button from "../../components/ui/button/Button";
+import useWidth from "../../hooks/useWidth";
+import ConfirmationModal from "../../components/confirm";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../utils";
 
 export default function UserMetaCard() {
     const [showPassword, setShowPassword] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [form, setForm] = useState({ current_password: "", new_password: "" });
 
     const { openModal, closeModal, isOpen } = useModal();
-
+    const { notDesktop } = useWidth();
+    const { logout, user } = useAuthStore((state) => state);
+    const { isPending, mutate } = useChangePassword();
+    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -26,9 +34,11 @@ export default function UserMetaCard() {
         }));
     };
 
-    const { logout, user } = useAuthStore((state) => state);
-
-    const { isPending, mutate } = useChangePassword();
+    const handleLogout = () => {
+        setShowLogoutConfirm(false);
+        logout();
+        navigate(ROUTES.SIGNIN);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,142 +57,173 @@ export default function UserMetaCard() {
 
     if (!user) {
         return (
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 animate-pulse">
-                <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                    <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-                        <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
-                        <div className="order-3 xl:order-2 flex flex-col gap-2">
-                            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
-                            <div className="flex flex-col items-center gap-1 xl:flex-row xl:gap-3">
-                                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
-                                <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-                                <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
-                            </div>
-                        </div>
+            <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs animate-pulse">
+                <div className="flex items-center gap-4">
+                    <div className="size-16 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-5 w-36 bg-gray-200 dark:bg-gray-800 rounded" />
+                        <div className="h-4 w-24 bg-gray-100 dark:bg-gray-800/60 rounded" />
                     </div>
-                    <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-full" />
                 </div>
             </div>
         );
     }
+
+    const initials = `${user?.first_name?.[0] ?? ""}${user?.last_name?.[0] ?? ""}`.toUpperCase() || "CM";
+
     return (
         <>
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                    <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-                        <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+            <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="size-16 sm:size-20 overflow-hidden border border-gray-200 rounded-2xl dark:border-gray-800 flex items-center justify-center bg-brand-50 text-brand-600 font-bold text-xl dark:bg-brand-500/20 dark:text-brand-400 flex-shrink-0">
                             {user?.image_url ? (
-                                <img src={user.image_url} alt="user" className="w-full h-full object-cover" />
+                                <img src={user.image_url} alt="Profile" className="size-full object-cover" />
                             ) : (
-                                <span className="text-2xl font-semibold text-gray-600 dark:text-gray-300">
-                                    {`${user?.first_name?.[0] ?? ""}${user?.last_name?.[0] ?? ""}`.toUpperCase()}
-                                </span>
+                                <span>{initials}</span>
                             )}
                         </div>
-                        <div className="order-3 xl:order-2">
-                            <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
+                        <div>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                                 {user?.first_name} {user?.last_name}
-                            </h4>
-                            <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    <Badge
-                                        variant="light"
-                                        color={user?.status === "active" ? "success" : "error"}
-                                        children={user?.status}
-                                    />
-                                </p>
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                    variant="light"
+                                    color={user?.status === "active" ? "success" : "error"}
+                                >
+                                    {user?.status}
+                                </Badge>
+                                <span className="text-xs text-gray-400 capitalize">
+                                    {user?.user_type || "Staff Member"}
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div className="flex align-items-center gap-2">
+
+                    <div className="grid grid-cols-2 sm:flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-800">
                         <button
+                            type="button"
                             onClick={openModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto whitespace-nowrap"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition"
                         >
-                            <LockClosedIcon className="size-4" />
-                            Change password
+                            <LockClosedIcon className="size-4 text-gray-500" />
+                            <span>Password</span>
                         </button>
+
                         <button
-                            onClick={logout}
-                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto whitespace-nowrap"
+                            type="button"
+                            onClick={() => setShowLogoutConfirm(true)}
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-red-200 bg-red-50/50 text-xs font-semibold text-red-600 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400 transition"
                         >
-                            <ArrowLeftEndOnRectangleIcon className="w-5 h-5 text-red-500" />
-                            Logout
+                            <ArrowRightOnRectangleIcon className="size-4" />
+                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
             </div>
-            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-                <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-                    <div className="px-2 pr-14">
-                        <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Change Password</h4>
+
+            <Modal
+                isOpen={isOpen}
+                onClose={closeModal}
+                isFullscreen={notDesktop}
+                className="max-w-[500px] m-0 sm:m-2"
+            >
+                <div className="flex flex-col min-h-full">
+                    <div className="pb-4 border-b border-gray-100 dark:border-gray-800">
+                        <h4 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                            Change Password
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Update your account security credentials
+                        </p>
                     </div>
-                    <form className="flex flex-col" onSubmit={handleSubmit}>
-                        <div className="custom-scrollbar h-auto overflow-y-auto px-2 pb-3">
-                            <div className="mt-7">
-                                <div>
-                                    <Label>
-                                        Current Password <span className="text-error-500">*</span>{" "}
-                                    </Label>
-                                    <div className="relative">
-                                        <Input
-                                            type={showPassword ? "text" : "password"}
-                                            name="current_password"
-                                            value={form.current_password}
-                                            placeholder="Enter your current password"
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <span
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                                        >
-                                            {showPassword ? (
-                                                <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                                            ) : (
-                                                <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                                            )}
-                                        </span>
-                                    </div>
+
+                    <form className="flex flex-col flex-1 mt-4" onSubmit={handleSubmit}>
+                        <div className="space-y-4 flex-1">
+                            <div>
+                                <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    Current Password <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        type={showPassword ? "text" : "password"}
+                                        name="current_password"
+                                        value={form.current_password}
+                                        placeholder="Enter current password"
+                                        onChange={handleChange}
+                                        required
+                                        className="pr-12"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 flex size-10 items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? (
+                                            <EyeIcon className="size-5 fill-current" />
+                                        ) : (
+                                            <EyeCloseIcon className="size-5 fill-current" />
+                                        )}
+                                    </button>
                                 </div>
                             </div>
-                            <div className="mt-5">
-                                <Label>
-                                    New Password <span className="text-error-500">*</span>{" "}
+
+                            <div>
+                                <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    New Password <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         name="new_password"
                                         value={form.new_password}
-                                        placeholder="Enter your new password"
+                                        placeholder="Enter new password"
                                         onChange={handleChange}
                                         required
+                                        className="pr-12"
                                     />
-                                    <span
+                                    <button
+                                        type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 flex size-10 items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
                                     >
                                         {showPassword ? (
-                                            <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                                            <EyeIcon className="size-5 fill-current" />
                                         ) : (
-                                            <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                                            <EyeCloseIcon className="size-5 fill-current" />
                                         )}
-                                    </span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 px-2 mt-6 justify-end">
-                            <Button size="sm" disabled={isPending} variant="outline" onClick={closeModal}>
-                                Close
+
+                        <div className="sticky bottom-0 pt-4 mt-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+                            <Button
+                                size="sm"
+                                disabled={isPending}
+                                variant="outline"
+                                onClick={closeModal}
+                                type="button"
+                            >
+                                Cancel
                             </Button>
-                            <Button size="sm" disabled={isPending}>
-                                {isPending ? "Saving Changes" : "Save Changes"}
+                            <Button size="sm" disabled={isPending} type="submit">
+                                {isPending ? "Updating..." : "Update Password"}
                             </Button>
                         </div>
                     </form>
                 </div>
             </Modal>
+
+            <ConfirmationModal
+                title="Are you sure you want to sign out?"
+                isOpen={showLogoutConfirm}
+                onCancel={() => setShowLogoutConfirm(false)}
+                onConfirm={handleLogout}
+            />
         </>
     );
 }

@@ -9,9 +9,10 @@ import { formatDate } from "../../utils/date";
 import { useUpdateBusinessPreferences } from "../../hooks/useApiHooks";
 import AccessWrapper from "../../components/AccessController";
 import { PERMISSION_VALUES } from "../../utils";
-import { PencilIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import useWidth from "../../hooks/useWidth";
 
 const Preferences = ({ data }: { data: Business["preferences"] }) => {
     const [form, setForm] = useState<UpdateBusinessPreferencesRequest>({
@@ -20,9 +21,11 @@ const Preferences = ({ data }: { data: Business["preferences"] }) => {
         email_notification: data?.email_notification,
         require_two_factor: data?.require_two_factor
     });
-    const { openModal, closeModal, isOpen } = useModal();
 
+    const { openModal, closeModal, isOpen } = useModal();
+    const { notDesktop } = useWidth();
     const { isPending, mutate } = useUpdateBusinessPreferences();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         setForm({
@@ -32,8 +35,6 @@ const Preferences = ({ data }: { data: Business["preferences"] }) => {
             require_two_factor: data?.require_two_factor
         });
     }, [data]);
-
-    const queryClient = useQueryClient();
 
     const updateForm = (field: keyof UpdateBusinessPreferencesRequest, value: string) => {
         setForm((prev) => ({
@@ -48,7 +49,7 @@ const Preferences = ({ data }: { data: Business["preferences"] }) => {
         mutate(form, {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["business"] });
-                toast.success("Business preference Updated successfully");
+                toast.success("Business preference updated successfully");
                 closeModal();
             },
             onError: (error) => {
@@ -56,74 +57,122 @@ const Preferences = ({ data }: { data: Business["preferences"] }) => {
             }
         });
     };
+
     return (
         <>
-            <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                    <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-                        <span className="text-2xl font-semibold text-gray-600 dark:text-gray-300">Preferences</span>
+            <div className="p-4 sm:p-6 border border-gray-200/80 rounded-2xl bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+                    <div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                            Notification Preferences
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Manage automated SMS & Email dispatch channels
+                        </p>
                     </div>
+
                     <AccessWrapper componentPermissions={[PERMISSION_VALUES.business.update_business_preferences]}>
                         <button
+                            type="button"
                             onClick={openModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto"
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition self-start sm:self-auto"
                         >
-                            <PencilIcon className="size-4" />
-                            Edit
+                            <PencilSquareIcon className="size-4" />
+                            <span>Edit Preferences</span>
                         </button>
                     </AccessWrapper>
                 </div>
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between my-10">
-                    <div>
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">SMS SENDER ID</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">{data?.sms_id}</p>
-                            </div>
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">SMS Notification</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {data?.sms_notification ? "YES" : "NO"}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">EMAIL Notification</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {data?.email_notification ? "YES" : "NO"}
-                                </p>
-                            </div>
 
-                            <div>
-                                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Updated At</p>
-                                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    {formatDate(data?.updated_at, "llll")}
-                                </p>
-                            </div>
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 text-xs">
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            SMS Sender ID
+                        </p>
+                        <p className="text-sm font-bold text-gray-800 dark:text-white">
+                            {data?.sms_id || "Not Configured"}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            SMS Notifications
+                        </p>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            data?.sms_notification ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        }`}>
+                            {data?.sms_notification ? "Enabled" : "Disabled"}
+                        </span>
+                    </div>
+
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Email Notifications
+                        </p>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            data?.email_notification ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        }`}>
+                            {data?.email_notification ? "Enabled" : "Disabled"}
+                        </span>
+                    </div>
+
+                    <div>
+                        <p className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                            Last Updated
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                            {formatDate(data?.updated_at, "lll")}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-                <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-                    <div className="px-2 pr-14">
-                        <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Edit Preferences</h4>
+            <Modal
+                isOpen={isOpen}
+                onClose={closeModal}
+                isFullscreen={notDesktop}
+                className="max-w-[550px] m-0 sm:m-2"
+            >
+                <div className="flex flex-col min-h-full">
+                    <div className="pb-4 border-b border-gray-100 dark:border-gray-800">
+                        <h4 className="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                            Edit Preferences
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Update outbound messaging identification
+                        </p>
                     </div>
-                    <form className="flex flex-col" onSubmit={handleSubmit}>
-                        <div className="custom-scrollbar h-auto overflow-y-auto px-2 pb-3">
-                            <div className="mt-7">
-                                <div className="col-span-1">
-                                    <Label>SMS Sender ID</Label>
-                                    <Input type="text" value={form?.sms_id || ""} onChange={(e) => updateForm("sms_id", e.target.value)} />
-                                </div>
+
+                    <form className="flex flex-col flex-1 mt-4" onSubmit={handleSubmit}>
+                        <div className="space-y-4 flex-1">
+                            <div>
+                                <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    SMS Sender ID
+                                </Label>
+                                <Input
+                                    type="text"
+                                    value={form?.sms_id || ""}
+                                    placeholder="e.g. CORPMAN"
+                                    maxLength={11}
+                                    onChange={(e) => updateForm("sms_id", e.target.value)}
+                                />
+                                <p className="text-[11px] text-gray-400 mt-1">
+                                    Maximum 11 alphanumeric characters as required by telecom operators.
+                                </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 px-2 mt-6 justify-end">
-                            <Button size="sm" disabled={isPending} variant="outline" onClick={closeModal}>
-                                Close
+
+                        <div className="sticky bottom-0 pt-4 mt-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+                            <Button
+                                size="sm"
+                                disabled={isPending}
+                                variant="outline"
+                                onClick={closeModal}
+                                type="button"
+                            >
+                                Cancel
                             </Button>
-                            <Button size="sm" disabled={isPending}>
-                                {isPending ? "Saving Changes" : "Save Changes"}
+                            <Button size="sm" disabled={isPending} type="submit">
+                                {isPending ? "Saving..." : "Save Preferences"}
                             </Button>
                         </div>
                     </form>

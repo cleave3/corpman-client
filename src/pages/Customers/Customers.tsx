@@ -7,20 +7,20 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import {
     MagnifyingGlassIcon,
     ArrowPathIcon,
-    PencilIcon,
-    ListBulletIcon,
+    PencilSquareIcon,
     ArrowDownTrayIcon,
-    UserPlusIcon
+    UserPlusIcon,
+    FunnelIcon,
+    WalletIcon,
+    PhoneIcon,
+    CalendarIcon
 } from "@heroicons/react/24/outline";
 import Button from "../../components/button/Button";
 import NewCustomer from "./NewCustomer";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import { Customer } from "../../api/types";
-import { DropdownItem } from "../../components/ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
 import Input from "../../components/form/input/InputField";
-import { Dropdown } from "../../components/ui/dropdown/Dropdown";
 import WalletHistory from "./WalletHistory";
 import useWidth from "../../hooks/useWidth";
 import SearchableSelect from "../../components/form/SearchableSelect";
@@ -32,21 +32,9 @@ const Customers = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const [searchInput, setSearchInput] = useState("");
-    const [openDropDown, setOpenDropDown] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer>(null);
-    const [index, setInex] = useState(0);
-
-    function toggleDropdown() {
-        setOpenDropDown((prev) => !prev);
-    }
-
-    function closeDropdown() {
-        setOpenDropDown(false);
-        setInex(0);
-    }
 
     const { closeModal, isOpen, openModal } = useModal();
-
     const { notDesktop } = useWidth();
 
     const [filterData, setFilterData] = useState({
@@ -62,480 +50,424 @@ const Customers = () => {
     const { data, isLoading } = useCustomers(filterData);
 
     const pageData = data?.data?.customers ?? [];
-
     const currentPage = data?.data?.page ?? 1;
-
     const pageSize = data?.data?.limit ?? 10;
-
     const totalData = data?.data?.total ?? 0;
 
     const downloadReport = async () => {
         await toast.promise(async () => await ApiService.downloadCustomerList(), {
             pending: "Exporting customer list...",
-            success: "List Exported successfully",
+            success: "List exported successfully",
             error: "Error downloading customer list. Try again"
         });
     };
 
+    const handleSearch = () => {
+        setFilterData((prev) => ({ ...prev, search: searchInput, page: 1 }));
+    };
+
+    const handleResetFilters = () => {
+        setSearchInput("");
+        setFilterData({
+            page: 1,
+            limit: 10,
+            search: "",
+            start_date: "",
+            customer_type: "",
+            end_date: "",
+            status: ""
+        });
+        setShowFilters(false);
+    };
+
     return (
-        <>
-            <PageBreadcrumb pageTitle={`Customers`} />
-            <div className="relative flex justify-between items-center flex-wrap mb-5">
-                <div className="flex align-center gap-x-2">
-                    <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.create_customers]}>
-                        <button
-                            type="button"
-                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
-                            onClick={openModal}
+        <div className="space-y-4">
+            <PageBreadcrumb pageTitle="Customers" />
+
+            {/* Actions & Search Controls */}
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    {/* Primary Button Group */}
+                    <div className="flex items-center gap-2">
+                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.create_customers]}>
+                            <button
+                                type="button"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 text-white font-medium text-sm hover:bg-brand-600 active:scale-[0.98] transition shadow-xs"
+                                onClick={openModal}
+                            >
+                                <UserPlusIcon className="size-4" />
+                                <span>New Customer</span>
+                            </button>
+                        </AccessWrapper>
+
+                        <AccessWrapper
+                            componentPermissions={[
+                                PERMISSION_VALUES.customers.view_customers,
+                                PERMISSION_VALUES.customers.view_balances
+                            ]}
                         >
-                            <UserPlusIcon className="size-6" />
-                            New Customer
-                        </button>
-                    </AccessWrapper>
-                    <AccessWrapper
-                        componentPermissions={[PERMISSION_VALUES.customers.view_customers, PERMISSION_VALUES.customers.view_balances]}
-                    >
-                        <button
-                            type="button"
-                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-700 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
-                            onClick={downloadReport}
-                        >
-                            <ArrowDownTrayIcon className="size-4" />
-                            Export
-                        </button>
-                    </AccessWrapper>
-                </div>
-                <div className="flex items-center justify-end mt-3 gap-5">
-                    <button
-                        type="button"
-                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                        onClick={() => setShowFilters((prev) => !prev)}
-                        aria-label="Show Filters"
-                    >
-                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="text-gray-700 dark:text-white">
-                            <path
-                                d="M3 5h18M6 12h12M10 19h4"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                            <button
+                                type="button"
+                                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 active:scale-[0.98] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800 transition shadow-xs"
+                                onClick={downloadReport}
+                            >
+                                <ArrowDownTrayIcon className="size-4" />
+                                <span>Export</span>
+                            </button>
+                        </AccessWrapper>
+                    </div>
+
+                    {/* Search & Filter Toggles */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <div className="relative flex-1 sm:w-64">
+                            <Input
+                                value={searchInput}
+                                placeholder="Search by name, email..."
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                className="pr-10"
                             />
-                        </svg>
-                    </button>
-                    <Dropdown isOpen={showFilters} onClose={() => setShowFilters((prev) => !prev)} className="p-2">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2">Customer Type</label>
+                            <button
+                                type="button"
+                                onClick={handleSearch}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+                                aria-label="Search"
+                            >
+                                <MagnifyingGlassIcon className="size-5" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            className={`flex size-11 sm:size-10 flex-shrink-0 items-center justify-center rounded-xl border transition ${
+                                showFilters || filterData.status || filterData.customer_type || filterData.start_date
+                                    ? "bg-brand-50 border-brand-300 text-brand-600 dark:bg-brand-500/20 dark:border-brand-500/30 dark:text-brand-400"
+                                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300"
+                            }`}
+                            onClick={() => setShowFilters((prev) => !prev)}
+                            aria-label="Toggle Filters"
+                        >
+                            <FunnelIcon className="size-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Collapsible Filter Panel */}
+                {showFilters && (
+                    <div className="p-4 rounded-2xl border border-gray-200/80 bg-white dark:bg-gray-900/80 dark:border-gray-800 shadow-xs space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    Customer Type
+                                </label>
                                 <SearchableSelect
                                     value={filterData?.customer_type}
                                     options={[
-                                        { value: "", label: "All" },
+                                        { value: "", label: "All Types" },
                                         { value: "regular", label: "Regular" },
                                         { value: "premium", label: "Premium" }
                                     ]}
-                                    placeholder="Customer Type"
-                                    onChange={(value) => setFilterData((prev) => ({ ...prev, customer_type: value }))}
-                                    className="dark:bg-dark-900 w-40"
+                                    placeholder="All Types"
+                                    onChange={(value) => setFilterData((prev) => ({ ...prev, customer_type: value, page: 1 }))}
                                 />
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2">Customer Status</label>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    Status
+                                </label>
                                 <SearchableSelect
                                     value={filterData?.status}
                                     options={[
-                                        { value: "", label: "All" },
+                                        { value: "", label: "All Statuses" },
                                         { value: "active", label: "Active" },
                                         { value: "inactive", label: "Inactive" }
                                     ]}
-                                    placeholder="Customer Status"
-                                    onChange={(value) => setFilterData((prev) => ({ ...prev, status: value }))}
-                                    className="dark:bg-dark-900 w-40"
+                                    placeholder="All Statuses"
+                                    onChange={(value) => setFilterData((prev) => ({ ...prev, status: value, page: 1 }))}
                                 />
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="start-date">
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
                                     Start Date
                                 </label>
                                 <Input
-                                    id="start-date"
                                     type="date"
-                                    placeholder="Start Date"
-                                    className="w-60"
                                     value={filterData?.start_date}
-                                    onChange={(e) => setFilterData((prev) => ({ ...prev, start_date: e.target.value }))}
+                                    onChange={(e) => setFilterData((prev) => ({ ...prev, start_date: e.target.value, page: 1 }))}
                                 />
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="end-date">
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
                                     End Date
                                 </label>
                                 <Input
-                                    id="end-date"
                                     type="date"
-                                    placeholder="End Date"
-                                    className="w-60"
                                     value={filterData?.end_date}
-                                    onChange={(e) => setFilterData((prev) => ({ ...prev, end_date: e.target.value }))}
+                                    onChange={(e) => setFilterData((prev) => ({ ...prev, end_date: e.target.value, page: 1 }))}
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center justify-end mt-3">
-                            <Input
-                                value={searchInput}
-                                placeholder="name/email..."
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        setFilterData((prev) => ({ ...prev, search: searchInput, page: 1 }));
-                                    }
-                                }}
-                            />
-                            <Button
-                                className="ml-2 p-2 w-10 h-10 flex items-center"
-                                variant="primary"
-                                onClick={() => setFilterData((prev) => ({ ...prev, search: searchInput, page: 1 }))}
-                            >
-                                <MagnifyingGlassIcon className="size-6" />
-                            </Button>
 
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
                             <Button
-                                className="ml-2 p-2 w-10 h-10 flex items-center"
-                                variant="secondary"
-                                onClick={() => {
-                                    setSearchInput("");
-                                    setFilterData((prev) => ({
-                                        ...prev,
-                                        search: "",
-                                        start_date: "",
-                                        end_date: "",
-                                        customer_type: "",
-                                        status: "",
-                                        page: 1
-                                    }));
-                                }}
+                                variant="ghost"
+                                className="text-xs"
+                                onClick={handleResetFilters}
                             >
-                                <ArrowPathIcon className="size-6" />
+                                <ArrowPathIcon className="size-4 mr-1 inline" />
+                                Reset
                             </Button>
                         </div>
-                    </Dropdown>
-                </div>
+                    </div>
+                )}
             </div>
-            <div className="hidden lg:block max-w-full overflow-x-auto">
-                <Pagination
-                    loaded={pageData.length}
-                    total={totalData}
-                    page={currentPage}
-                    limit={pageSize}
-                    nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                    prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                />
-            </div>
+
+            {/* Content Area */}
             {isLoading ? (
                 <TableLoader length={filterData.limit} />
             ) : (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                    <div className="hidden lg:block max-w-full overflow-x-auto  min-h-screen">
-                        <div className="min-w-[1102px]">
+                <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900/60 shadow-xs">
+                    {/* Desktop View Table */}
+                    <div className="hidden lg:block max-w-full overflow-x-auto min-h-[400px]">
+                        <div className="min-w-[1000px]">
                             <Table>
-                                {/* Table Header */}
-                                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                <TableHeader className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
                                     <TableRow>
-                                        <TableCell isHeader className="">
-                                            Name (Code)
-                                        </TableCell>
-
+                                        <TableCell isHeader>Name & Code</TableCell>
                                         <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                            <TableCell isHeader className="">
-                                                Current Balance
-                                            </TableCell>
+                                            <TableCell isHeader>Current Balance</TableCell>
                                         </AccessWrapper>
-                                        <TableCell isHeader className="">
-                                            Customer Type
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Status
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Email
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            telephone
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Next Payment Date
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Address
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Created At
-                                        </TableCell>
-                                        <TableCell isHeader className="">
-                                            Created By
-                                        </TableCell>
+                                        <TableCell isHeader>Type</TableCell>
+                                        <TableCell isHeader>Status</TableCell>
+                                        <TableCell isHeader>Phone / Email</TableCell>
+                                        <TableCell isHeader>Next Payment</TableCell>
+                                        <TableCell isHeader>Actions</TableCell>
                                     </TableRow>
                                 </TableHeader>
-
-                                {/* Table Body */}
-                                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                    {pageData.map((customer, i) => (
-                                        <TableRow key={customer.id}>
-                                            <TableCell className="px-5 py-4 sm:px-6 text-start">
-                                                {/* <div className="flex items-center gap-3">
-                                                {customer?.image_url ? (
-                                                    <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center">
-                                                        <img
-                                                            width={40}
-                                                            height={40}
-                                                            src={customer.image_url}
-                                                            alt={customer.first_name}
-                                                            className="object-cover w-full h-full"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-lg">
-                                                        {`${customer.first_name?.[0] ?? ""}${customer.last_name?.[0] ?? ""}`}
-                                                    </div>
-                                                )}
-                                                <div>
-                                                    <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                        {customer?.first_name} {customer?.last_name}
-                                                    </span>
-                                                </div>
-                                            </div> */}
-                                                {customer?.name} {customer?.customer_code ? `(${customer?.customer_code})` : ""}
+                                <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                    {pageData.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell className="text-center py-10 text-gray-400" isHeader={false}>
+                                                No customers found matching your criteria.
                                             </TableCell>
-                                            {/* <TableCell className="font-bold">{customer?.customer_code ?? "-"}</TableCell> */}
-                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                                <TableCell className="">{formatCurrency(customer?.balance)}</TableCell>
-                                            </AccessWrapper>
-                                            <TableCell className="">
-                                                <span
-                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                                        customer.customer_type === "premium"
-                                                            ? "bg-yellow-100 text-yellow-800"
-                                                            : "bg-blue-100 text-blue-800"
-                                                    }`}
-                                                >
-                                                    {customer.customer_type === "premium" ? "Premium" : "Regular"}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="">
-                                                <span
-                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold  ${
-                                                        customer.status === "active"
-                                                            ? "bg-green-500 text-gray-200"
-                                                            : "bg-gray-100 text-black"
-                                                    }`}
-                                                >
-                                                    {customer.status === "active" ? "Active" : "Inactive"}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="">{customer?.email ?? "-"}</TableCell>
-                                            <TableCell className="">{customer?.phone}</TableCell>
-                                            <TableCell className="">{formatDate(customer?.next_payment_date)}</TableCell>
-                                            <TableCell className="">{customer?.address}</TableCell>
-                                            <TableCell className="">{formatDate(customer?.created_at, "llll")}</TableCell>
-                                            <TableCell className="">{customer?.creator?.name}</TableCell>
-                                            <AccessWrapper
-                                                componentPermissions={[
-                                                    PERMISSION_VALUES.customers.update_customers,
-                                                    PERMISSION_VALUES.customers.view_balances
-                                                ]}
-                                            >
+                                        </TableRow>
+                                    ) : (
+                                        pageData.map((customer) => (
+                                            <TableRow key={customer.id}>
                                                 <TableCell>
-                                                    <div className="relative inline-block">
-                                                        <button
-                                                            className="dropdown-toggle"
-                                                            onClick={() => {
-                                                                setInex(i + 1);
-                                                                toggleDropdown();
-                                                            }}
-                                                        >
-                                                            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
-                                                        </button>
-                                                        <Dropdown
-                                                            isOpen={openDropDown && index === i + 1}
-                                                            onClose={closeDropdown}
-                                                            className="w-40 p-2"
-                                                        >
-                                                            <AccessWrapper
-                                                                componentPermissions={[PERMISSION_VALUES.customers.update_customers]}
-                                                            >
-                                                                <DropdownItem
-                                                                    onItemClick={() => {
-                                                                        setSelectedCustomer(customer);
-                                                                        openModal();
-                                                                        closeDropdown();
-                                                                    }}
-                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                                >
-                                                                    Edit Customer
-                                                                </DropdownItem>
-                                                            </AccessWrapper>
-                                                            <AccessWrapper
-                                                                componentPermissions={[PERMISSION_VALUES.customers.view_balances]}
-                                                            >
-                                                                <DropdownItem
-                                                                    onItemClick={() => {
-                                                                        setSelectedCustomer(customer);
-                                                                        setDrawerOpen(true);
-                                                                        closeDropdown();
-                                                                    }}
-                                                                    className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                                >
-                                                                    Wallet History
-                                                                </DropdownItem>
-                                                            </AccessWrapper>
-                                                        </Dropdown>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold text-gray-900 dark:text-white">
+                                                            {customer.name}
+                                                        </span>
+                                                        <span className="text-xs font-mono text-gray-400">
+                                                            {customer.customer_code || "-"}
+                                                        </span>
                                                     </div>
                                                 </TableCell>
-                                            </AccessWrapper>
-                                        </TableRow>
-                                    ))}
+                                                <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                                    <TableCell>
+                                                        <span className="font-semibold tabular-nums text-gray-900 dark:text-emerald-400">
+                                                            {formatCurrency(customer.balance)}
+                                                        </span>
+                                                    </TableCell>
+                                                </AccessWrapper>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                                                        customer.customer_type === "premium"
+                                                            ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                                            : "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
+                                                    }`}>
+                                                        {customer.customer_type || "Regular"}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                                                        customer.status === "active"
+                                                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                                    }`}>
+                                                        {customer.status || "Active"}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col text-xs text-gray-600 dark:text-gray-300">
+                                                        <span>{customer.phone || "-"}</span>
+                                                        <span className="text-gray-400 truncate max-w-[160px]">{customer.email || "-"}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                                                        {formatDate(customer.next_payment_date)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.update_customers]}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedCustomer(customer);
+                                                                    openModal();
+                                                                }}
+                                                                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition"
+                                                                aria-label="Edit customer"
+                                                            >
+                                                                <PencilSquareIcon className="size-4" />
+                                                            </button>
+                                                        </AccessWrapper>
+                                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedCustomer(customer);
+                                                                    setDrawerOpen(true);
+                                                                }}
+                                                                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition"
+                                                                aria-label="Wallet history"
+                                                            >
+                                                                <WalletIcon className="size-4" />
+                                                            </button>
+                                                        </AccessWrapper>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
                         </div>
                     </div>
-                    <div className="block lg:hidden px-2 py-4">
-                        <Pagination
-                            loaded={pageData.length}
-                            total={totalData}
-                            page={currentPage}
-                            limit={pageSize}
-                            nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                            prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                        />
-                        {pageData.length === 0 ? (
-                            <div className="text-center text-gray-400 dark:text-gray-500 py-8">No customers found.</div>
-                        ) : (
-                            pageData.map((customer) => (
-                                <div
-                                    key={customer.id}
-                                    className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="w-1/2">
-                                            <div className="flex items-center gap-3">
-                                                {/* {customer?.image_url ? (
-                                                <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center">
-                                                    <img
-                                                        width={40}
-                                                        height={40}
-                                                        src={customer.image_url}
-                                                        alt={customer.first_name}
-                                                        className="object-cover w-full h-full"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-lg">
-                                                    {`${customer.first_name?.[0] ?? ""}${customer.last_name?.[0] ?? ""}`}
-                                                </div>
-                                            )} */}
-                                                <div>
-                                                    <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                        {customer?.name}
-                                                    </span>
-                                                    <span
-                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                                                            customer.customer_type === "premium"
-                                                                ? "bg-yellow-100 text-yellow-800"
-                                                                : "bg-blue-100 text-blue-800"
-                                                        }`}
-                                                    >
-                                                        {customer.customer_type === "premium" ? "Premium" : "Regular"}
-                                                    </span>
 
-                                                    <span
-                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mx-2  ${
-                                                            customer.status === "active"
-                                                                ? "bg-green-500 text-gray-200"
-                                                                : "bg-gray-100 text-black"
-                                                        }`}
-                                                    >
-                                                        {customer.status === "active" ? "Active" : "Inactive"}
+                    {/* Mobile View: High-Density Responsive Cards */}
+                    <div className="block lg:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                        {pageData.length === 0 ? (
+                            <div className="py-12 px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No customers found matching your criteria.
+                            </div>
+                        ) : (
+                            pageData.map((customer) => {
+                                const initials = (customer.name || "C")
+                                    .split(" ")
+                                    .slice(0, 2)
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .toUpperCase();
+
+                                return (
+                                    <div
+                                        key={customer.id}
+                                        className="p-4 space-y-3 transition-colors active:bg-gray-50/60 dark:active:bg-gray-800/40"
+                                    >
+                                        {/* Card Header: Identity & Status */}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 font-bold text-sm dark:bg-brand-500/15 dark:text-brand-400">
+                                                    {initials}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                                        {customer.name}
+                                                    </h3>
+                                                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                                                        {customer.customer_code || "No code"}
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${
+                                                    customer.status === "active"
+                                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                                }`}>
+                                                    {customer.status || "Active"}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="w-1/2 flex justify-end">
-                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.update_customers]}>
-                                                <Button
-                                                    variant="ghost"
-                                                    // size="icon"
-                                                    className="p-1 h-7 w-7 mx-2"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setSelectedCustomer(customer);
-                                                        openModal();
-                                                    }}
+
+                                        {/* Balance Row */}
+                                        <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
+                                            <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                    Current Balance
+                                                </span>
+                                                <span className="text-base font-bold tabular-nums text-gray-900 dark:text-emerald-400">
+                                                    {formatCurrency(customer.balance)}
+                                                </span>
+                                            </div>
+                                        </AccessWrapper>
+
+                                        {/* Metadata Attributes */}
+                                        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                            {customer.phone && (
+                                                <a
+                                                    href={`tel:${customer.phone}`}
+                                                    className="flex items-center gap-1.5 hover:text-brand-600 transition truncate"
                                                 >
-                                                    <PencilIcon className="h-4 w-4" />
-                                                </Button>
-                                            </AccessWrapper>
+                                                    <PhoneIcon className="size-3.5 text-gray-400" />
+                                                    <span className="truncate">{customer.phone}</span>
+                                                </a>
+                                            )}
+                                            {customer.next_payment_date && (
+                                                <div className="flex items-center gap-1.5 truncate">
+                                                    <CalendarIcon className="size-3.5 text-gray-400" />
+                                                    <span className="truncate">Next: {formatDate(customer.next_payment_date)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Card Actions Footer */}
+                                        <div className="flex items-center justify-end gap-2 pt-1 border-t border-gray-100 dark:border-gray-800/60">
                                             <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.view_balances]}>
-                                                <Button
-                                                    variant="secondary"
-                                                    className="p-1 h-7 w-7"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
                                                         setSelectedCustomer(customer);
                                                         setDrawerOpen(true);
                                                     }}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition"
                                                 >
-                                                    <ListBulletIcon className="h-4 w-4" />
-                                                </Button>
+                                                    <WalletIcon className="size-3.5" />
+                                                    History
+                                                </button>
+                                            </AccessWrapper>
+
+                                            <AccessWrapper componentPermissions={[PERMISSION_VALUES.customers.update_customers]}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedCustomer(customer);
+                                                        openModal();
+                                                    }}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400 dark:hover:bg-brand-500/25 transition"
+                                                >
+                                                    <PencilSquareIcon className="size-3.5" />
+                                                    Edit
+                                                </button>
                                             </AccessWrapper>
                                         </div>
                                     </div>
-                                    <div className="flex flex-wrap gap-y-2 mb-2">
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Balance</div>
-                                            <div className="text-sm font-bold text-gray-900 dark:text-success-600">
-                                                {formatCurrency(customer?.balance)}
-                                            </div>
-                                        </div>
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Code</div>
-                                            <div className="text-sm text-black dark:text-gray-200 font-bold">
-                                                {customer?.customer_code ?? "-"}
-                                            </div>
-                                        </div>
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Telephone</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.phone ?? "-"}</div>
-                                        </div>
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Next Payment Date</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">
-                                                {formatDate(customer?.next_payment_date)}
-                                            </div>
-                                        </div>
-                                        <div className="w-full">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Email</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.email ?? "-"}</div>
-                                        </div>
-                                        <div className="w-full">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Address</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.address ?? "-"}</div>
-                                        </div>
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">
-                                                {formatDate(customer?.created_at, "lll")}
-                                            </div>
-                                        </div>
-                                        <div className="w-1/2">
-                                            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created By</div>
-                                            <div className="text-sm text-gray-700 dark:text-gray-200">{customer?.creator?.name ?? "-"}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
+
+                    {/* Pagination */}
+                    <Pagination
+                        loaded={pageData.length}
+                        total={totalData}
+                        page={currentPage}
+                        limit={pageSize}
+                        nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
+                        prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
+                    />
                 </div>
             )}
+
+            {/* Customer Edit/Create Modal */}
             <Modal
                 isOpen={isOpen}
                 onClose={() => {
@@ -543,7 +475,7 @@ const Customers = () => {
                     setSelectedCustomer(null);
                 }}
                 isFullscreen={notDesktop}
-                className="max-w-[700px] m-2 h-auto"
+                className="max-w-[700px] m-0 sm:m-2"
             >
                 <NewCustomer
                     closeModal={() => {
@@ -553,6 +485,8 @@ const Customers = () => {
                     customerToEdit={selectedCustomer}
                 />
             </Modal>
+
+            {/* Wallet History Drawer */}
             {!!selectedCustomer && isDrawerOpen && (
                 <WalletHistory
                     customer={selectedCustomer}
@@ -562,7 +496,7 @@ const Customers = () => {
                     }}
                 />
             )}
-        </>
+        </div>
     );
 };
 

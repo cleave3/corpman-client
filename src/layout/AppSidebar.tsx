@@ -4,8 +4,6 @@ import { Link, useLocation } from "react-router";
 import { ChevronDownIcon, GridIcon, ListIcon, PageIcon, TeamIcon, UserGroup, UserIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { menuPermissions, PERMISSION_VALUES, ROUTES } from "../utils";
-// import { useAuthStore } from "../hooks/useAuthStore";
-import useWidth from "../hooks/useWidth";
 // import { useTheme } from "../context/ThemeContext";
 import AccessWrapper from "../components/AccessController";
 
@@ -91,14 +89,8 @@ const navItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-    const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
+    const { isExpanded, isHovered, setIsHovered } = useSidebar();
     const location = useLocation();
-
-    // const { logout } = useAuthStore((state) => state);
-
-    const { isMobile } = useWidth();
-
-    // const { theme } = useTheme();
 
     const [openSubmenu, setOpenSubmenu] = useState<{
         type: "main" | "others";
@@ -107,7 +99,6 @@ const AppSidebar: React.FC = () => {
     const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-    // const isActive = (path: string) => location.pathname === path;
     const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
 
     useEffect(() => {
@@ -175,8 +166,8 @@ const AppSidebar: React.FC = () => {
                                 >
                                     {nav.icon}
                                 </span>
-                                {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
-                                {(isExpanded || isHovered || isMobileOpen) && (
+                                {(isExpanded || isHovered) && <span className="menu-item-text">{nav.name}</span>}
+                                {(isExpanded || isHovered) && (
                                     <ChevronDownIcon
                                         className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                                             openSubmenu?.type === menuType && openSubmenu?.index === index
@@ -190,7 +181,6 @@ const AppSidebar: React.FC = () => {
                             nav.path && (
                                 <Link
                                     to={nav.path}
-                                    onClick={isMobile ? toggleMobileSidebar : undefined}
                                     className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}
                                 >
                                     <span
@@ -200,11 +190,11 @@ const AppSidebar: React.FC = () => {
                                     >
                                         {nav.icon}
                                     </span>
-                                    {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
+                                    {(isExpanded || isHovered) && <span className="menu-item-text">{nav.name}</span>}
                                 </Link>
                             )
                         )}
-                        {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
+                        {nav.subItems && (isExpanded || isHovered) && (
                             <div
                                 ref={(el) => {
                                     subMenuRefs.current[`${menuType}-${index}`] = el;
@@ -213,8 +203,8 @@ const AppSidebar: React.FC = () => {
                                 style={{
                                     height:
                                         openSubmenu?.type === menuType && openSubmenu?.index === index
-                                            ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                                            : "0px"
+                                        ? `${subMenuHeight[`${menuType}-${index}`]}px`
+                                        : "0px"
                                 }}
                             >
                                 <ul className="mt-2 space-y-1 ml-9">
@@ -222,7 +212,6 @@ const AppSidebar: React.FC = () => {
                                         <AccessWrapper key={i}>
                                             <li key={subItem.name}>
                                                 <Link
-                                                    onClick={isMobile ? toggleMobileSidebar : undefined}
                                                     to={subItem.path}
                                                     className={`menu-dropdown-item ${
                                                         isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
@@ -268,10 +257,8 @@ const AppSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-auto lg:h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+            className={`hidden lg:flex fixed top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 flex-col
+        ${isExpanded ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}`}
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

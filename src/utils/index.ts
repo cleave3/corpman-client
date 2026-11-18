@@ -46,6 +46,18 @@ export const menuPermissions = (menu: keyof typeof PERMISSION_VALUES): string[] 
     return Object.values(PERMISSION_VALUES[menu]);
 };
 
+export const hasPermissions = (userPermissions: string[] = [], componentPermissions: string[] = []) => {
+    if (componentPermissions.length === 0) return true;
+
+    for (let index = 0; index < componentPermissions.length; index++) {
+        const permission = componentPermissions[index];
+
+        if (userPermissions.includes(permission)) return true;
+    }
+
+    return false;
+};
+
 export const ROUTES = {
     DASHBOARD: "/",
     SIGNIN: "/signin",

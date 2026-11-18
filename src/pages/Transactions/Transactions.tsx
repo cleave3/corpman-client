@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { DocumentPlusIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect } from "react";
+import { DocumentPlusIcon, FunnelIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { TableLoader, Table, TableHeader, TableRow, TableCell, TableBody, Pagination } from "../../components/ui/table";
 import { useGetUsers, useTransactions } from "../../hooks/useApiHooks";
@@ -11,36 +11,35 @@ import { Modal } from "../../components/ui/modal";
 import { Transaction } from "../../api/types";
 import TransactionDetail from "./TransactionDetail";
 import Input from "../../components/form/input/InputField";
-import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Dropdown } from "../../components/ui/dropdown/Dropdown";
 import SearchableSelect from "../../components/form/SearchableSelect";
 import AccessWrapper from "../../components/AccessController";
 import useWidth from "../../hooks/useWidth";
+import Button from "../../components/button/Button";
 
 const Transactions = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [params] = useSearchParams();
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction>(null);
-    const [filterData, setFilterData] = useState({ page: 1, limit: 15, start_date: "", status: "", end_date: "", user_id: "" });
+    const [filterData, setFilterData] = useState({
+        page: 1,
+        limit: 15,
+        start_date: "",
+        status: "",
+        end_date: "",
+        user_id: ""
+    });
 
     const { closeModal, isOpen, openModal } = useModal();
-
     const { notDesktop } = useWidth();
-
     const { data, isLoading } = useTransactions(filterData);
-
     const { data: userData } = useGetUsers();
+    const navigate = useNavigate();
 
     const pageData = data?.data?.transactions ?? [];
-
     const currentPage = data?.data?.page ?? 1;
-
     const pageSize = data?.data?.limit ?? 15;
-
     const totalData = data?.data?.total ?? 0;
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         const status = params.get("status");
@@ -49,152 +48,150 @@ const Transactions = () => {
         }
     }, [params]);
 
-    const users = [{ value: "", label: "All" }].concat(
+    const users = [{ value: "", label: "All Initiators" }].concat(
         userData?.data?.map?.((u) => ({ value: u.uid, label: `${u.first_name} ${u.last_name}` })) ?? []
     );
 
+    const handleResetFilters = () => {
+        setFilterData({
+            page: 1,
+            limit: 15,
+            start_date: "",
+            status: "",
+            end_date: "",
+            user_id: ""
+        });
+        setShowFilters(false);
+    };
+
     return (
-        <>
-            <PageBreadcrumb pageTitle={`Transactions`} />
-            <div className="relative flex justify-between flex-wrap mb-5">
-                <AccessWrapper componentPermissions={[PERMISSION_VALUES.transaction.initiate_transaction]}>
+        <div className="space-y-4">
+            <PageBreadcrumb pageTitle="Transactions" />
+
+            {/* Top Bar Controls */}
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                    <AccessWrapper componentPermissions={[PERMISSION_VALUES.transaction.initiate_transaction]}>
+                        <button
+                            type="button"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 text-white font-medium text-sm hover:bg-brand-600 active:scale-[0.98] transition shadow-xs"
+                            onClick={() => navigate(ROUTES.NEW_TRANSACTIONS)}
+                        >
+                            <DocumentPlusIcon className="size-4" />
+                            <span>New Transaction</span>
+                        </button>
+                    </AccessWrapper>
+
                     <button
                         type="button"
-                        className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-bludownloadReporte-700 transition text-sm mt-4"
-                        onClick={() => navigate(ROUTES.NEW_TRANSACTIONS)}
+                        className={`flex size-11 sm:size-10 flex-shrink-0 items-center justify-center rounded-xl border transition ${
+                            showFilters || filterData.status || filterData.user_id || filterData.start_date
+                                ? "bg-brand-50 border-brand-300 text-brand-600 dark:bg-brand-500/20 dark:border-brand-500/30 dark:text-brand-400"
+                                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300"
+                        }`}
+                        onClick={() => setShowFilters((prev) => !prev)}
+                        aria-label="Toggle Filters"
                     >
-                        <DocumentPlusIcon className="size-6" />
-                        New Transaction
+                        <FunnelIcon className="size-5" />
                     </button>
-                </AccessWrapper>
-                <button
-                    type="button"
-                    className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                    onClick={() => setShowFilters((prev) => !prev)}
-                    aria-label="Show Filters"
-                >
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" className="text-gray-700 dark:text-white">
-                        <path
-                            d="M3 5h18M6 12h12M10 19h4"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                </button>
+                </div>
 
-                <Dropdown isOpen={showFilters} onClose={() => setShowFilters((prev) => !prev)} className="p-2">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                            <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
-                                Initiator
-                            </label>
-                            <SearchableSelect
-                                value={filterData.user_id}
-                                options={users}
-                                placeholder="Initiator"
-                                onChange={(value) => setFilterData((prev) => ({ ...prev, user_id: value }))}
-                                className="dark:bg-dark-900 w-40"
-                            />
+                {/* Collapsible Filter Panel */}
+                {showFilters && (
+                    <div className="p-4 rounded-2xl border border-gray-200/80 bg-white dark:bg-gray-900/80 dark:border-gray-800 shadow-xs space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    Initiator
+                                </label>
+                                <SearchableSelect
+                                    value={filterData.user_id}
+                                    options={users}
+                                    placeholder="All Initiators"
+                                    onChange={(value) => setFilterData((prev) => ({ ...prev, user_id: value, page: 1 }))}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    Status
+                                </label>
+                                <SearchableSelect
+                                    value={filterData?.status}
+                                    options={[
+                                        { value: "", label: "All Statuses" },
+                                        { value: "completed", label: "Completed" },
+                                        { value: "pending", label: "Pending" },
+                                        { value: "cancelled", label: "Cancelled" }
+                                    ]}
+                                    placeholder="All Statuses"
+                                    onChange={(value) => setFilterData((prev) => ({ ...prev, status: value, page: 1 }))}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    Start Date
+                                </label>
+                                <Input
+                                    type="date"
+                                    value={filterData?.start_date}
+                                    onChange={(e) => setFilterData((prev) => ({ ...prev, start_date: e.target.value, page: 1 }))}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                                    End Date
+                                </label>
+                                <Input
+                                    type="date"
+                                    value={filterData?.end_date}
+                                    onChange={(e) => setFilterData((prev) => ({ ...prev, end_date: e.target.value, page: 1 }))}
+                                />
+                            </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                            <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="transaction-status">
-                                Transaction Status
-                            </label>
-                            <SearchableSelect
-                                value={filterData?.status}
-                                options={[
-                                    { value: "", label: "All" },
-                                    { value: "cancelled", label: "Cancelled" },
-                                    { value: "completed", label: "Completed" },
-                                    { value: "pending", label: "Pending" }
-                                ]}
-                                placeholder="Transaction Status"
-                                onChange={(value) => setFilterData((prev) => ({ ...prev, status: value }))}
-                                className="dark:bg-dark-900 w-40"
-                            />
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                            <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="start-date">
-                                Start Date
-                            </label>
-                            <Input
-                                id="start-date"
-                                type="date"
-                                placeholder="Start Date"
-                                className="w-60"
-                                value={filterData?.start_date}
-                                onChange={(e) => setFilterData((prev) => ({ ...prev, start_date: e.target.value }))}
-                            />
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                            <label className="text-xs text-gray-500 min-w-[110px] sm:text-right sm:mr-2" htmlFor="end-date">
-                                End Date
-                            </label>
-                            <Input
-                                id="end-date"
-                                type="date"
-                                placeholder="End Date"
-                                className="w-60"
-                                value={filterData?.end_date}
-                                onChange={(e) => setFilterData((prev) => ({ ...prev, end_date: e.target.value }))}
-                            />
+
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                            <Button variant="ghost" className="text-xs" onClick={handleResetFilters}>
+                                <ArrowPathIcon className="size-4 mr-1 inline" />
+                                Reset
+                            </Button>
                         </div>
                     </div>
-                </Dropdown>
+                )}
             </div>
+
+            {/* Transactions Content */}
             {isLoading ? (
                 <TableLoader length={filterData.limit} />
             ) : (
-                <>
-                    <div className="hidden lg:block max-w-full overflow-x-auto">
-                        <Pagination
-                            loaded={pageData.length}
-                            total={totalData}
-                            page={currentPage}
-                            limit={pageSize}
-                            nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                            prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                        />
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="hidden lg:block max-w-full overflow-x-auto">
-                            <div className="min-w-[1102px]">
-                                <Table>
-                                    {/* Table Header */}
-                                    <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900/60 shadow-xs">
+                    {/* Desktop View Table */}
+                    <div className="hidden lg:block max-w-full overflow-x-auto min-h-[400px]">
+                        <div className="min-w-[1000px]">
+                            <Table>
+                                <TableHeader className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+                                    <TableRow>
+                                        <TableCell isHeader>ID</TableCell>
+                                        <TableCell isHeader>Amount</TableCell>
+                                        <TableCell isHeader>Charges</TableCell>
+                                        <TableCell isHeader>Type / Customer</TableCell>
+                                        <TableCell isHeader>Status</TableCell>
+                                        <TableCell isHeader>Description</TableCell>
+                                        <TableCell isHeader>Initiator</TableCell>
+                                        <TableCell isHeader>Created Date</TableCell>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                    {pageData.length === 0 ? (
                                         <TableRow>
-                                            <TableCell isHeader className="">
-                                                ID
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Amount
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Charges
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Type
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Status
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Description
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Initiator
-                                            </TableCell>
-                                            <TableCell isHeader className="">
-                                                Created At
+                                            <TableCell className="text-center py-10 text-gray-400" isHeader={false}>
+                                                No transactions found matching your criteria.
                                             </TableCell>
                                         </TableRow>
-                                    </TableHeader>
-
-                                    {/* Table Body */}
-                                    <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                        {pageData.map((transaction) => (
+                                    ) : (
+                                        pageData.map((transaction) => (
                                             <TableRow
                                                 key={transaction.id}
                                                 onClick={() => {
@@ -202,17 +199,28 @@ const Transactions = () => {
                                                     openModal();
                                                 }}
                                             >
-                                                <TableCell className="">{transaction?.id}</TableCell>
-                                                <TableCell className="">{formatCurrency(transaction?.amount)}</TableCell>
-                                                <TableCell>{transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}</TableCell>
-                                                <TableCell>
-                                                    {transaction?.transaction_type}
-                                                    {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
+                                                <TableCell className="font-mono text-xs">{transaction?.id}</TableCell>
+                                                <TableCell className="font-semibold tabular-nums text-gray-900 dark:text-emerald-400">
+                                                    {formatCurrency(transaction?.amount)}
                                                 </TableCell>
-                                                <TableCell className="">
+                                                <TableCell className="tabular-nums text-xs text-red-600 dark:text-red-400">
+                                                    {transaction?.charges ? formatCurrency(transaction?.charges) : "—"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col text-xs">
+                                                        <span className="font-medium capitalize text-gray-900 dark:text-white">
+                                                            {transaction?.transaction_type?.replace(/_/g, " ")}
+                                                        </span>
+                                                        {transaction?.meta_data?.customer && (
+                                                            <span className="text-gray-400 truncate max-w-[150px]">
+                                                                {transaction.meta_data.customer}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
                                                     <Badge
                                                         variant="light"
-                                                        children={transaction?.status}
                                                         color={
                                                             transaction?.status === "completed"
                                                                 ? "success"
@@ -220,50 +228,63 @@ const Transactions = () => {
                                                                 ? "warning"
                                                                 : "error"
                                                         }
-                                                    />
+                                                    >
+                                                        {transaction?.status}
+                                                    </Badge>
                                                 </TableCell>
-                                                <TableCell className="">{transaction?.description}</TableCell>
-                                                <TableCell className="">{transaction?.initiator?.name}</TableCell>
-                                                <TableCell className="">{formatDate(transaction?.created_at, "llll")}</TableCell>
+                                                <TableCell className="text-xs text-gray-500 truncate max-w-[200px]">
+                                                    {transaction?.description || "—"}
+                                                </TableCell>
+                                                <TableCell className="text-xs text-gray-700 dark:text-gray-300">
+                                                    {transaction?.initiator?.name || "—"}
+                                                </TableCell>
+                                                <TableCell className="text-xs text-gray-500">
+                                                    {formatDate(transaction?.created_at, "lll")}
+                                                </TableCell>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
                         </div>
+                    </div>
 
-                        {/* Mobile Cards */}
-                        <div className="block lg:hidden px-2 py-4">
-                            <Pagination
-                                loaded={pageData.length}
-                                total={totalData}
-                                page={currentPage}
-                                limit={pageSize}
-                                nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
-                                prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
-                            />
-                            {pageData.length === 0 ? (
-                                <div className="text-center text-gray-400 dark:text-gray-500 py-8">No transactions found.</div>
-                            ) : (
-                                pageData.map((transaction) => (
+                    {/* Mobile View: Clean Modern Activity Cards */}
+                    <div className="block lg:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                        {pageData.length === 0 ? (
+                            <div className="py-12 px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No transactions found matching your criteria.
+                            </div>
+                        ) : (
+                            pageData.map((transaction) => {
+                                const isPositive = transaction?.transaction_type === "customer_deposit" || transaction?.transaction_type === "income";
+
+                                return (
                                     <div
                                         key={transaction.id}
-                                        className="mb-4 rounded-xl border border-gray-200 dark:border-white/[0.07] p-4 shadow transition hover:shadow-md cursor-pointer"
                                         onClick={() => {
                                             setSelectedTransaction(transaction);
                                             openModal();
                                         }}
+                                        className="p-4 space-y-2.5 transition-colors active:bg-gray-50/60 dark:active:bg-gray-800/40 cursor-pointer"
                                     >
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="w-1/2">
-                                                {/* <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Amount</div> */}
-                                                <div className="text-sm font-bold text-gray-900 dark:text-success-600">
-                                                    {formatCurrency(transaction?.amount)}
-                                                </div>
+                                        {/* Row 1: Amount & Status */}
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex flex-col">
+                                                <span className={`text-base font-bold tabular-nums ${
+                                                    isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white"
+                                                }`}>
+                                                    {isPositive ? "+" : ""}{formatCurrency(transaction?.amount)}
+                                                </span>
+                                                {transaction?.charges ? (
+                                                    <span className="text-[11px] text-red-500 dark:text-red-400">
+                                                        Fee: {formatCurrency(transaction.charges)}
+                                                    </span>
+                                                ) : null}
                                             </div>
+
                                             <Badge
                                                 variant="light"
-                                                children={transaction?.status}
                                                 color={
                                                     transaction?.status === "completed"
                                                         ? "success"
@@ -271,52 +292,54 @@ const Transactions = () => {
                                                         ? "warning"
                                                         : "error"
                                                 }
-                                            />
+                                            >
+                                                {transaction?.status}
+                                            </Badge>
                                         </div>
-                                        <div className="flex flex-wrap gap-y-2 mb-2">
-                                            <div className="w-full">
-                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Charges</div>
-                                                <div className="text-sm text-red-700">
-                                                    {transaction?.charges ? formatCurrency(transaction?.charges) : "N/A"}
-                                                </div>
-                                            </div>
+
+                                        {/* Row 2: Customer / Type */}
+                                        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
+                                            <span className="font-medium capitalize text-gray-900 dark:text-white">
+                                                {transaction?.transaction_type?.replace(/_/g, " ")}
+                                            </span>
+                                            {transaction?.meta_data?.customer && (
+                                                <span className="font-semibold text-gray-800 dark:text-gray-200 truncate max-w-[160px]">
+                                                    {transaction.meta_data.customer}
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="flex flex-wrap gap-y-2 mb-2">
-                                            <div className="w-1/2">
-                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Type</div>
-                                                <div className="text-sm text-gray-700 dark:text-gray-200">
-                                                    {transaction?.transaction_type}{" "}
-                                                    {transaction?.meta_data?.customer ? ` (${transaction?.meta_data?.customer})` : ""}
-                                                </div>
-                                            </div>
-                                            <div className="w-1/2 mt-2">
-                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Created</div>
-                                                <div className="text-sm text-gray-700 dark:text-gray-200">
-                                                    {formatDate(transaction?.created_at, "lll")}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-wrap gap-y-2 mb-2">
-                                            <div className="w-full">
-                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Description</div>
-                                                <div className="text-sm text-gray-700 dark:text-gray-200">{transaction?.description}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-wrap gap-y-2 mb-2">
-                                            <div className="w-full">
-                                                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Initiator</div>
-                                                <div className="text-sm text-gray-700 dark:text-gray-200">
-                                                    {transaction?.initiator?.name}
-                                                </div>
-                                            </div>
+
+                                        {/* Row 3: Description Excerpt if any */}
+                                        {transaction?.description && (
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                                {transaction.description}
+                                            </p>
+                                        )}
+
+                                        {/* Row 4: Initiator & Timestamp */}
+                                        <div className="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-800/60">
+                                            <span>By: {transaction?.initiator?.name || "System"}</span>
+                                            <span>{formatDate(transaction?.created_at, "lll")}</span>
                                         </div>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                );
+                            })
+                        )}
                     </div>
-                </>
+
+                    {/* Pagination */}
+                    <Pagination
+                        loaded={pageData.length}
+                        total={totalData}
+                        page={currentPage}
+                        limit={pageSize}
+                        nextFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page + 1 }))}
+                        prevFunc={() => setFilterData((prev) => ({ ...prev, page: prev.page - 1 }))}
+                    />
+                </div>
             )}
+
+            {/* Transaction Detail Modal */}
             <Modal
                 isOpen={isOpen}
                 isFullscreen={notDesktop}
@@ -324,11 +347,11 @@ const Transactions = () => {
                     setSelectedTransaction(null);
                     closeModal();
                 }}
-                className="max-w-[700px] m-2"
+                className="max-w-[700px] m-0 sm:m-2"
             >
                 {selectedTransaction && <TransactionDetail selectedTransaction={selectedTransaction} />}
             </Modal>
-        </>
+        </div>
     );
 };
 

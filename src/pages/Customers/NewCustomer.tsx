@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreateCustomer, useUpdateCustomer } from "../../hooks/useApiHooks";
 import { toast } from "react-toastify";
 import CurrencyInput from "../../components/form/input/CurrencyInput";
@@ -8,7 +8,6 @@ import { currentDate } from "../../utils/date";
 import Input from "../../components/form/input/InputField";
 import { useQueryClient } from "@tanstack/react-query";
 import { Customer, StaticFunc, UpdateCustomerRequest } from "../../api/types";
-import { useEffect } from "react";
 import Button from "../../components/button/Button";
 
 const NewCustomer = ({ closeModal, customerToEdit }: { closeModal: StaticFunc; customerToEdit: Customer }) => {
@@ -26,7 +25,6 @@ const NewCustomer = ({ closeModal, customerToEdit }: { closeModal: StaticFunc; c
     });
 
     const { mutate: cm, isPending: cP } = useCreateCustomer();
-
     const { mutate: um, isPending: uP } = useUpdateCustomer();
 
     useEffect(() => {
@@ -85,7 +83,7 @@ const NewCustomer = ({ closeModal, customerToEdit }: { closeModal: StaticFunc; c
                 customer_code: customer.customer_code,
                 customer_type: customer.customer_type,
                 next_payment_date: customer.next_payment_date,
-                sms_alert: customer.sms_alert,
+                sms_alert: customer.sms_alert
             };
             um(
                 { customerId: customerToEdit.id, data: editCustomerData },
@@ -117,136 +115,188 @@ const NewCustomer = ({ closeModal, customerToEdit }: { closeModal: StaticFunc; c
     const isPending = uP || cP;
 
     return (
-        <div className="p-7 pt-10">
-            <h2 className="text-2xl font-semibold mb-4 dark:text-white">{customerToEdit ? "Edit Customer" : "New Customer"}</h2>
-            <form className="flex flex-col" onSubmit={handleSubmit}>
-                <div className="custom-scrollbar h-auto  px-2 pb-3">
-                    <div className="mt-7">
-                        <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Customer Name</Label>
-                                <Input
-                                    type="text"
-                                    name="name"
-                                    value={customer.name}
-                                    onChange={handleChange}
+        <div className="flex flex-col min-h-full">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
+                <div>
+                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        {customerToEdit ? "Edit Customer" : "New Customer"}
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {customerToEdit ? "Update customer profile details" : "Register a new client in the system"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Form Body */}
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 mt-4">
+                <div className="space-y-4 flex-1">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Customer Name <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="text"
+                                name="name"
+                                value={customer.name}
+                                onChange={handleChange}
+                                required
+                                placeholder="e.g. John Doe"
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Customer Code <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="text"
+                                name="customer_code"
+                                value={customer.customer_code}
+                                onChange={handleChange}
+                                maxLength={20}
+                                required
+                                placeholder="e.g. CM-001"
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Customer Type
+                            </Label>
+                            <SearchableSelect
+                                placeholder="Select type"
+                                value={customer.customer_type}
+                                onChange={(value) => setCustomer((prev) => ({ ...prev, customer_type: value }))}
+                                options={[
+                                    { label: "Regular", value: "regular" },
+                                    { label: "Premium", value: "premium" }
+                                ]}
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                SMS Alert Notifications
+                            </Label>
+                            <SearchableSelect
+                                placeholder="Select SMS Alert"
+                                value={customer.sms_alert}
+                                onChange={(value) => setCustomer((prev) => ({ ...prev, sms_alert: value }))}
+                                options={[
+                                    { label: "YES", value: "YES" },
+                                    { label: "NO", value: "NO" }
+                                ]}
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Phone Number <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="tel"
+                                name="phone"
+                                value={customer.phone}
+                                onChange={handleChange}
+                                required
+                                placeholder="08012345678"
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Email Address
+                            </Label>
+                            <Input
+                                type="email"
+                                name="email"
+                                value={customer.email}
+                                onChange={handleChange}
+                                placeholder="customer@example.com"
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Payment Frequency
+                            </Label>
+                            <SearchableSelect
+                                placeholder="Select frequency"
+                                value={customer.payment_frequency}
+                                onChange={(value) => setCustomer((prev) => ({ ...prev, payment_frequency: value }))}
+                                options={[
+                                    { label: "Daily", value: "daily" },
+                                    { label: "Weekly", value: "weekly" },
+                                    { label: "Biweekly", value: "biweekly" },
+                                    { label: "Monthly", value: "monthly" },
+                                    { label: "Yearly", value: "yearly" }
+                                ]}
+                            />
+                        </div>
+
+                        <div className="col-span-1">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Next Payment Date <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                type="date"
+                                name="next_payment_date"
+                                value={customer.next_payment_date}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        {!customerToEdit && (
+                            <div className="col-span-1 sm:col-span-2">
+                                <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    Opening Balance <span className="text-red-500">*</span>
+                                </Label>
+                                <CurrencyInput
                                     required
-                                    placeholder="Enter customer name"
+                                    name="opening_balance"
+                                    value={customer.opening_balance}
+                                    onChange={(value) => setCustomer((prev) => ({ ...prev, opening_balance: value }))}
+                                    placeholder="Enter opening balance"
                                 />
                             </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Customer Code</Label>
-                                <Input
-                                    type="text"
-                                    name="customer_code"
-                                    value={customer.customer_code}
-                                    onChange={handleChange}
-                                    maxLength={20}
-                                    required
-                                    placeholder="Enter customer code"
-                                />
-                            </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Customer type</Label>
-                                <SearchableSelect
-                                    placeholder="Select customer type"
-                                    value={customer.customer_type}
-                                    onChange={(value) => setCustomer((prev) => ({ ...prev, customer_type: value }))}
-                                    options={[
-                                        { label: "Regular", value: "regular" },
-                                        { label: "Premium", value: "premium" }
-                                    ]}
-                                />
-                            </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>SMS Alert Settings</Label>
-                                <SearchableSelect
-                                    placeholder="Select Alert Settings"
-                                    value={customer.sms_alert}
-                                    onChange={(value) => setCustomer((prev) => ({ ...prev, sms_alert: value }))}
-                                    options={[
-                                        { label: "YES", value: "YES" },
-                                        { label: "NO", value: "NO" }
-                                    ]}
-                                />
-                            </div>
-                            <div className="col-span-2">
-                                <Label>Email</Label>
-                                <Input
-                                    type="email"
-                                    name="email"
-                                    value={customer.email}
-                                    onChange={handleChange}
-                                    // required
-                                    placeholder="Enter email address"
-                                />
-                            </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Phone</Label>
-                                <Input
-                                    type="tel"
-                                    name="phone"
-                                    value={customer.phone}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Enter phone number"
-                                />
-                            </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Payment Frequency</Label>
-                                <SearchableSelect
-                                    placeholder="Select payment frequency"
-                                    value={customer.payment_frequency}
-                                    onChange={(value) => setCustomer((prev) => ({ ...prev, payment_frequency: value }))}
-                                    options={[
-                                        { label: "Daily", value: "daily" },
-                                        { label: "Weekly", value: "weekly" },
-                                        { label: "Biweekly", value: "biweekly" },
-                                        { label: "Monthly", value: "monthly" },
-                                        { label: "Yearly", value: "yearly" }
-                                    ]}
-                                />
-                            </div>
-                            <div className="col-span-2 lg:col-span-1">
-                                <Label>Next Payment Date</Label>
-                                <Input
-                                    className="input"
-                                    type="date"
-                                    name="next_payment_date"
-                                    value={customer.next_payment_date}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Select next payment date"
-                                />
-                            </div>
-                            {!customerToEdit && (
-                                <div className="col-span-2 lg:col-span-1">
-                                    <Label>Opening Balance</Label>
-                                    <CurrencyInput
-                                        required
-                                        name="opening_balance"
-                                        value={customer.opening_balance}
-                                        onChange={(value) => setCustomer((prev) => ({ ...prev, opening_balance: value }))}
-                                        placeholder="Enter opening balance"
-                                    />
-                                </div>
-                            )}
-                            <div className="col-span-2">
-                                <Label>Address</Label>
-                                <Input
-                                    type="text"
-                                    name="address"
-                                    value={customer.address}
-                                    onChange={handleChange}
-                                    placeholder="Enter address"
-                                />
-                            </div>
+                        )}
+
+                        <div className="col-span-1 sm:col-span-2">
+                            <Label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                Physical Address
+                            </Label>
+                            <Input
+                                type="text"
+                                name="address"
+                                value={customer.address}
+                                onChange={handleChange}
+                                placeholder="Street, City, State"
+                            />
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 px-2 mt-10 justify-end">
-                    <Button className="lg:w-full w-full" variant="primary" disabled={isPending}>
-                        {isPending ? "Saving Customer" : "Save Customer"}
+
+                {/* Sticky Action Footer */}
+                <div className="sticky bottom-0 pt-4 mt-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={closeModal}
+                        disabled={isPending}
+                        className="w-1/3 sm:w-auto"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={isPending}
+                        className="flex-1 sm:flex-initial sm:min-w-[160px]"
+                    >
+                        {isPending ? "Saving..." : customerToEdit ? "Save Changes" : "Create Customer"}
                     </Button>
                 </div>
             </form>

@@ -12,6 +12,12 @@ import Input from "../../components/form/input/InputField";
 import { useModal } from "../../hooks/useModal";
 import ConfirmationModal from "../../components/confirm";
 
+const TRANSACTION_TYPES = [
+    { label: "Customer Deposit", value: "customer_deposit" },
+    { label: "Payout", value: "payout" },
+    { label: "Income", value: "income" }
+];
+
 const NewTransaction = () => {
     const [transaction, setTransaction] = useState<CreateTransactionRequest>({
         amount: 0,
@@ -22,9 +28,7 @@ const NewTransaction = () => {
     });
 
     const { isOpen, openModal, closeModal } = useModal();
-
     const { mutate, isPending } = useCreateTransaction();
-
     const { data } = useGetAllCustomers();
 
     const handleTransactionChange = (field: string, value: string | number) => {
@@ -34,8 +38,28 @@ const NewTransaction = () => {
         }));
     };
 
+    const handleTypeSelect = (typeValue: string) => {
+        if (typeValue === "income") {
+            setTransaction((prev) => ({
+                ...prev,
+                transaction_type: typeValue,
+                meta_data: {}
+            }));
+        } else {
+            setTransaction((prev) => ({
+                ...prev,
+                transaction_type: typeValue
+            }));
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (transaction.amount <= 0) {
+            toast.warning("Please enter a valid amount");
+            return;
+        }
 
         if (transaction.transaction_type !== "income" && !transaction?.meta_data?.customer_id) {
             toast.warning("Please select a customer");
@@ -48,21 +72,20 @@ const NewTransaction = () => {
     const handleConfirmAction = () => {
         if (transaction.transaction_type !== "income") {
             const customer = data?.data?.find?.((c) => c.id === transaction?.meta_data?.customer_id);
-            transaction.meta_data.customer = customer.name;
+            transaction.meta_data.customer = customer?.name || "";
         }
 
-        const payload = transaction;
-
+        const payload = { ...transaction };
         if (transaction.transaction_type !== "payout") payload.charges = null;
 
         closeModal();
 
         mutate(payload, {
-            onSuccess: async (data) => {
-                toast.success(data.message);
+            onSuccess: async (res) => {
+                toast.success(res.message);
                 setTransaction({
                     amount: 0,
-                    transaction_type: "",
+                    transaction_type: "customer_deposit",
                     charges: 0,
                     description: "",
                     meta_data: {}
@@ -75,132 +98,150 @@ const NewTransaction = () => {
     };
 
     return (
-        <>
-            <PageBreadcrumb pageTitle={`Add Transaction`} />
-            <div>
-                <form className="flex flex-col" onSubmit={handleSubmit}>
-                    <div className="px-2 pb-3">
-                        <div className="mt-7">
-                            <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                                <div className="col-span-2 lg:col-span-1">
-                                    <Label>Amount</Label>
-                                    <CurrencyInput
-                                        required
-                                        value={transaction.amount}
-                                        onChange={(e) => handleTransactionChange("amount", e)}
-                                    />
-                                </div>
+        <div className="space-y-4 max-w-3xl mx-auto">
+            <PageBreadcrumb pageTitle="Add Transaction" />
 
-                                <div className="col-span-2 lg:col-span-1">
-                                    <Label>Transaction Type</Label>
-                                    <SearchableSelect
-                                        placeholder="Select Transaction Type"
-                                        value={transaction?.transaction_type}
-                                        options={[
-                                            { label: "Customer Deposit", value: "customer_deposit" },
-                                            { label: "Payout", value: "payout" },
-                                            { label: "Income", value: "income" }
-                                        ].map((c) => ({
-                                            value: c.value,
-                                            label: c.label
-                                        }))}
-                                        onChange={(value) => {
-                                            if (value === "income") {
-                                                setTransaction((prev) => ({
-                                                    ...prev,
-                                                    transaction_type: value,
-                                                    meta_data: {}
-                                                }));
-                                            } else {
-                                                setTransaction((prev) => ({
-                                                    ...prev,
-                                                    transaction_type: value
-                                                }));
-                                            }
-                                        }}
-                                    />
-                                </div>
-
-                                {transaction?.transaction_type === "payout" && (
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Label>Charges</Label>
-                                        <CurrencyInput
-                                            required
-                                            min={1}
-                                            value={transaction.charges}
-                                            onChange={(e) => handleTransactionChange("charges", e)}
-                                        />
-                                    </div>
-                                )}
-
-                                {transaction?.transaction_type !== "income" && (
-                                    <>
-                                        <div className="col-span-2 lg:col-span-1">
-                                            <Label>Customer</Label>
-                                            <SearchableSelect
-                                                placeholder="Select Customer"
-                                                value={transaction?.meta_data?.customer_id}
-                                                options={(data?.data || [])?.map((c) => ({
-                                                    value: c.id,
-                                                    label: `${c.name} [${c.customer_code}] ${c.phone ? ` - [${c.phone}]` : ""}` // [${formatCurrency(c.balance)}]`
-                                                }))}
-                                                onChange={(value) =>
-                                                    setTransaction((prev) => ({
-                                                        ...prev,
-                                                        meta_data: {
-                                                            customer_id: value
-                                                        }
-                                                    }))
-                                                }
-                                            />
-                                        </div>
-
-                                        <div className="col-span-2 lg:col-span-1">
-                                            <Label>Next Payment Date</Label>
-                                            <Input
-                                                placeholder="Start Date"
-                                                type="date"
-                                                value={transaction?.meta_data?.next_payment_date}
-                                                onChange={(e) =>
-                                                    setTransaction((prev) => ({
-                                                        ...prev,
-                                                        meta_data: {
-                                                            ...prev.meta_data,
-                                                            next_payment_date: e.target.value
-                                                        }
-                                                    }))
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                                <div className="col-span-2">
-                                    <Label>Description</Label>
-                                    <TextArea
-                                        value={transaction.description}
-                                        onChange={(e) => handleTransactionChange("description", e)}
-                                        required
-                                    />
-                                </div>
-                            </div>
+            <div className="rounded-2xl border border-gray-200/80 bg-white p-5 sm:p-7 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Step 1: Transaction Type Segmented Pills */}
+                    <div>
+                        <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2">
+                            Transaction Type <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-gray-100 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-800">
+                            {TRANSACTION_TYPES.map((t) => {
+                                const isSelected = transaction.transaction_type === t.value;
+                                return (
+                                    <button
+                                        type="button"
+                                        key={t.value}
+                                        onClick={() => handleTypeSelect(t.value)}
+                                        className={`flex items-center justify-center h-11 px-2 rounded-lg text-xs font-semibold transition active:scale-[0.98] ${
+                                            isSelected
+                                                ? "bg-white text-gray-900 shadow-xs dark:bg-gray-700 dark:text-white"
+                                                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                        }`}
+                                    >
+                                        <span className="truncate">{t.label}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 px-2 mt-6 justify-end">
-                        <Button size="sm" disabled={isPending}>
-                            {isPending ? "Saving Transaction" : "Save Transaction"}
+
+                    {/* Step 2: Amount & Charges */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className={transaction.transaction_type === "payout" ? "col-span-1" : "col-span-1 sm:col-span-2"}>
+                            <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                                Transaction Amount <span className="text-red-500">*</span>
+                            </Label>
+                            <CurrencyInput
+                                required
+                                value={transaction.amount}
+                                onChange={(val) => handleTransactionChange("amount", val)}
+                                placeholder="₦0.00"
+                            />
+                        </div>
+
+                        {transaction.transaction_type === "payout" && (
+                            <div className="col-span-1">
+                                <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Processing Charges <span className="text-red-500">*</span>
+                                </Label>
+                                <CurrencyInput
+                                    required
+                                    min={1}
+                                    value={transaction.charges || 0}
+                                    onChange={(val) => handleTransactionChange("charges", val)}
+                                    placeholder="₦0.00"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Step 3: Customer & Payment Details (Non-Income) */}
+                    {transaction.transaction_type !== "income" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100 dark:border-gray-800/60">
+                            <div className="col-span-1">
+                                <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Select Customer <span className="text-red-500">*</span>
+                                </Label>
+                                <SearchableSelect
+                                    placeholder="Search by name or code..."
+                                    value={transaction?.meta_data?.customer_id || ""}
+                                    options={(data?.data || []).map((c) => ({
+                                        value: c.id,
+                                        label: `${c.name} [${c.customer_code}] ${c.phone ? `(${c.phone})` : ""}`
+                                    }))}
+                                    onChange={(value) =>
+                                        setTransaction((prev) => ({
+                                            ...prev,
+                                            meta_data: {
+                                                ...prev.meta_data,
+                                                customer_id: value
+                                            }
+                                        }))
+                                    }
+                                />
+                            </div>
+
+                            <div className="col-span-1">
+                                <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Next Payment Date <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    type="date"
+                                    value={transaction?.meta_data?.next_payment_date || ""}
+                                    onChange={(e) =>
+                                        setTransaction((prev) => ({
+                                            ...prev,
+                                            meta_data: {
+                                                ...prev.meta_data,
+                                                next_payment_date: e.target.value
+                                            }
+                                        }))
+                                    }
+                                    required
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Description */}
+                    <div>
+                        <Label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                            Description / Purpose <span className="text-red-500">*</span>
+                        </Label>
+                        <TextArea
+                            value={transaction.description}
+                            onChange={(val) => handleTransactionChange("description", val)}
+                            placeholder="Enter a brief note or narration for this transaction..."
+                            rows={3}
+                            required
+                        />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-3">
+                        <Button
+                            disabled={isPending}
+                            type="submit"
+                            className="w-full h-12 text-sm font-semibold tracking-wide rounded-xl active:scale-[0.99] transition-transform shadow-xs"
+                            size="md"
+                        >
+                            {isPending ? "Submitting..." : "Submit Transaction"}
                         </Button>
                     </div>
                 </form>
             </div>
+
             <ConfirmationModal
-                title={`Are you sure you want to submit this transaction?`}
+                title="Please confirm this transaction submission"
                 isOpen={isOpen}
                 onCancel={closeModal}
                 onConfirm={handleConfirmAction}
             />
-        </>
+        </div>
     );
 };
 
